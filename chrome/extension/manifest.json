@@ -1,0 +1,37 @@
+{
+    "name": "TS",
+    "manifest_version": 2,
+    "icons": {
+        "16": "img/icon.ico",
+        "48": "img/icon48.png",
+        "128": "img/icon128.png"
+    },
+    "version": "1.0.0",
+    "description": "ts",
+    "background": {
+        "page": "background.html"
+    },
+    "browser_action": {
+        "default_icon": "img/icon128.png",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["src/js/content/content.js"],
+            "css": ["build/css/ext.min.css"]
+        }
+    ],
+    "web_accessible_resources":[
+        "build/js/*.js.map",
+        "src/js/content/content.js"
+    ],
+    "permissions": [
+        "contextMenus",
+        "unlimitedStorage",
+        "notifications",
+        "tabs",
+        "http://*/*",
+        "https://*/*"
+    ]
+}

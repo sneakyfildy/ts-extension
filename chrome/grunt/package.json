@@ -1,0 +1,13 @@
+{
+  "name": "uSlicer_UI",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-contrib-less": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-contrib-requirejs": "latest",
+    "grunt-closure-compiler": "latest"
+  },
+  "description": "ERROR: No README data found!",
+  "author": "IPONWEB"
+}

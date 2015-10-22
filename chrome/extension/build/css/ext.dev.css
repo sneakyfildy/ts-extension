@@ -1,0 +1,54 @@
+/*
+	Any rules can be mixins. These ones are technical and won't go to output
+	Here must be stored "function mixins". Some complicated and connected mixins.
+	- "MERGING!" means that it will be added to existing property of resulting rule, if there' any.
+		Example: merging the rule of 'border-width:1px' will result in 
+		'border-width:1px, 1px' if there was 'border-width:1px' before. LESS do merge with "+:"
+	- use .mixin-name() to prevent outputting such mixins
+*/
+/* 
+	MERGING! .transition Returns prefixed transition rules
+	Allows adding new transition rules on different css properties.
+	Example:
+		.transitionable{
+			.transition-add(opacity .1s ease-in-out);
+			.transition-add(color .3s ease-in-out);
+		}
+*/
+/* 
+	Returns prefixed transition rules. Also prefixes value
+	Differs from transtion-add in prefixing transitionable css property
+	Example: ("transform" property requieres prefixing)
+	.foobar{
+		.transition-prefixed-add(transform, .3s ease-in-out);
+	}
+*/
+/* 
+	MERGING! .transition-prefixed
+*/
+/* Returns @property prefixed with all prefixes and a @value as value */
+/* MERGING! .prefix */
+/* 
+*	Returns @property prefixed with all prefixes and a 
+*	@value with also prefixed another property.
+*	Typical use is willing to get such CSS string:
+*	-webkit-transition: -webkit-transform 0.3s ease-in-out;
+*	Where both property and value should be prefixed
+*/
+/* 
+*	MERGING! .prefix-prop-prefixed
+*/
+#ts-btn-container {
+  display: inline-block;
+  margin-left: 10px;
+  color: #BED4FF;
+  cursor: pointer;
+  -webkit-transition: color 0.1s ease-in-out;
+  -moz-transition: color 0.1s ease-in-out;
+  -o-transition: color 0.1s ease-in-out;
+  -ms-transition: color 0.1s ease-in-out;
+  transition: color 0.1s ease-in-out;
+}
+#ts-btn-container:active {
+  color: #fff;
+}
