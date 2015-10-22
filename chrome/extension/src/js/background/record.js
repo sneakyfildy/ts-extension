@@ -4,9 +4,9 @@ define([], function(){
 
     RecordMaker.prototype.make = function(details){
         var dateFormatted, date, month, day, endTime, startTime, hours, mins;
-        var textArr = [details.id, details.queue, details.subject];
+        var textArr = [details.queue, details.id, details.subject];
 
-        textArr[0] = 'RT:' + textArr[0];
+        textArr[1] = 'RT:' + textArr[1];
         textArr[2] = '"' + textArr[2] + '"';
         date = new Date();
         month = date.getMonth() + 1;
