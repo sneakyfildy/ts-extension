@@ -49,6 +49,13 @@ module.exports = function(grunt) {
                     out: 'extension/build/js/ext.dev.js',
                     name: 'BackgroundMain'
                 }
+            },
+            popup_dev:{
+                options:{
+                    optimize: 'none',
+                    out: 'extension/build/js/popup.dev.js',
+                    name: 'PopupMain'
+                }
             }
         },
         'closure-compiler': {
