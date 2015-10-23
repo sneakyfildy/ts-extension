@@ -1,11 +1,9 @@
 /* global chrome */
 
-define(['background/record'], function(record){
-    chrome.runtime.onMessage.addListener(
-        function (request, sender, sendResponse) {
-            if (request.action !== "ticketDetails"){ return; }
-            record.make(request);
-        }
-    );
+define([
+    'background/record',
+    'background/msgRouter'
+], function(record, msgRouter){
+    msgRouter.addListener('ticketDetails', record.make.bind(record));
 });
 

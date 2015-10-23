@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 	var watchLessFiles, watchJsFiles, warningSupress, projectGlobals;
 
 	watchLessFiles = ['less/**/*.less'];
-	watchJsFiles = ['**/*.js'];
+	watchJsFiles = ['**/*.js', '**/**/*.js'];
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),

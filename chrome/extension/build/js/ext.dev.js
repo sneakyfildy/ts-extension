@@ -55,33 +55,80 @@ define('background/record',[], function(){
 });
 /* global chrome */
 
-define('background/clickHandler',['background/record'], function(record){
-        chrome.contextMenus.create(
-            {
-                title: 'Form TS rec and ctrl+C',
-                contexts: ["page", "selection"],
-                onclick: onItemClick
-            }
-        );
+define('background/clickHandler',['background/record'], function (record) {
+    chrome.contextMenus.create(
+        {
+            title: 'Form TS rec and ctrl+C',
+            contexts: ["page", "selection"],
+            onclick: onItemClick
+        }
+    );
 
-    function onItemClick(info, tab){
+    function onItemClick(info, tab) {
         chrome.tabs.sendMessage(tab.id, {text: "tsGetDetails"}, onGetDetails.bind(this, info));
     }
 
-    function onGetDetails(info, details){
+    function onGetDetails(info, details) {
         details = details || {};
         record.make(details);
     }
 });
 /* global chrome */
 
-define('background/listenButton',['background/record'], function(record){
-    chrome.runtime.onMessage.addListener(
-        function (request, sender, sendResponse) {
-            if (request.action !== "ticketDetails"){ return; }
-            record.make(request);
+define('background/msgRouter',[
+], function(){
+    function MessageRouter(){
+        chrome.runtime.onMessage.addListener(this.messageListener.bind(this));
+
+        this.add = function(a,b){
+            this[a] = b;
+        };
+    }
+    // one action - one callback
+    MessageRouter.prototype.map = {};
+
+    /**
+     * Function, which handles messages
+     * @param {Object} request POJO with required 'action' property
+     * @param {String} request.action
+     * @param {Object} sender Chrome tab
+     * @param {Function} sendResponse Call special function, which is waiting for an answer
+     * @returns {undefined}
+     */
+    MessageRouter.prototype.messageListener = function (request, sender, sendResponse) {
+        try{
+            var action = request.action;
+            if ( this.map[action] && typeof this.map[action] === 'function' ){
+                this.map[action](request, sender, sendResponse); // provide already bound functions if needed
+            }
+        }catch(err){
+            console.warn('Message processing has failed. Let the developer know about that.')
         }
-    );
+    };
+    
+    /**
+     * Add one association "action->handler", which is checked with every
+     * message came
+     * @param {String} action
+     * @param {Function} callback
+     * @returns {undefined}
+     */
+    MessageRouter.prototype.addListener = function (action, callback) {
+        this.map[action] = callback; // one action - one callback
+    };
+
+    return new MessageRouter();
+
+});
+
+
+/* global chrome */
+
+define('background/listenButton',[
+    'background/record',
+    'background/msgRouter'
+], function(record, msgRouter){
+    msgRouter.addListener('ticketDetails', record.make.bind(record));
 });
 
 

@@ -3,11 +3,18 @@
     <head>
         <title>TS Ext popup</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="text/javascript" src="src/js/vendor/jquery-2.1.1.min.js"></script>
-        <script type="text/javascript" src="build/js/popup.dev.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        <link rel="stylesheet" href="build/css/ext.min.css">
+        <link rel="stylesheet" href="src/css/vendor/bs/bootstrap.min.css">
+        <link rel="stylesheet" href="src/css/vendor/bs/bootstrap-theme.min.css">
     </head>
-    <body>
-        <div>Marvelous popup page full of useful stuff</div>
+    <body class="popup" ng-csp>
+        <div class="content" ng-controller="contentController">
+            <div class="btn btn-default start-day" ng-click="startBtn.onClick($event)">{{startBtn.caption}}</div>
+        </div>
+        
+        <script data-main="build/js/popup.dev" src="src/js/vendor/angular.min.js"></script>
+        <script data-main="build/js/popup.dev" src="src/js/vendor/require.js"></script>        
+        <script type="text/javascript" src="src/js/vendor/jquery-2.1.1.min.js"></script>
     </body>
 </html>

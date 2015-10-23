@@ -3,5 +3,6 @@
  */
 
 require([
+    'popup/Main'
 ], function(){
 });
