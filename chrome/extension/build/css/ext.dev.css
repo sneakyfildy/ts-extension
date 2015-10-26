@@ -52,12 +52,28 @@
 #ts-btn-container:active {
   color: #fff;
 }
-body.popup {
-  width: 150px;
+/* hides angular not ready cloaked stuff in CSP mode */
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+  display: none !important;
+}
+body.ts-ext-popup {
+  width: 250px;
+  min-height: 70px;
   padding: 15px;
 }
-.content {
+body.ts-ext-popup .ts-popup-content {
   text-align: center;
+}
+body.ts-ext-popup .dblock {
+  display: block;
+}
+body.ts-ext-popup .dnone {
+  display: none;
 }
 .btn.start-day {
   margin: 0 auto;

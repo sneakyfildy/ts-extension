@@ -3,6 +3,6 @@
  */
 
 require([
-    'popup/Main'
+    'popup/popAppModule'
 ], function(){
 });

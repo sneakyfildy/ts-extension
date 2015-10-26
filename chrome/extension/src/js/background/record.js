@@ -1,4 +1,6 @@
-define([], function(){
+define([
+    'common/dates'
+], function(dates){
     function RecordMaker(){
     }
 
@@ -9,25 +11,14 @@ define([], function(){
         textArr[1] = 'RT:' + textArr[1];
         textArr[2] = '"' + textArr[2] + '"';
         date = new Date();
-        month = date.getMonth() + 1;
-        day = date.getDate();
-        month = month < 10 ? '0' + month : month;
-        day = day < 10 ? '0' + day : day;
-        dateFormatted = date.getFullYear() + '-' + month + '-' + day;
+        dateFormatted = dates.getHumanDate(date);
 
-        hours = date.getHours();
-        mins = date.getMinutes();
-        hours = hours < 10 ? '0' + hours : hours;
-        mins = mins < 10 ? '0' + mins : mins;
-        endTime = hours + ':' + mins;
+        endTime = dates.getHumanTime(date);
 
         date.setHours(10);
         date.setMinutes(0);
-        hours = date.getHours();
-        mins = date.getMinutes();
-        hours = hours < 10 ? '0' + hours : hours;
-        mins = mins < 10 ? '0' + mins : mins;
-        startTime = hours + ':' + mins;
+
+        startTime = dates.getHumanTime(date);
 
         textArr.unshift(endTime);
         textArr.unshift(startTime);

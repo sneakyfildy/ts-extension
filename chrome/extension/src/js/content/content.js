@@ -74,7 +74,7 @@
 
     function onButtonClick(){
         var data = collectTicketData() || {};
-        data.action = 'ticketDetails';
+        data.action = 'ts_ext_ticketDetails';
         chrome.runtime.sendMessage(data, function(response) {
             // handle response?
         });

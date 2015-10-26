@@ -4,6 +4,7 @@
 
 require([
     'background/clickHandler',
-    'background/listenButton'
+    'background/listenContent',
+    'background/listenPopup'
 ], function(){
 });
