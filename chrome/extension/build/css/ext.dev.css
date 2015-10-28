@@ -61,12 +61,25 @@
 .x-ng-cloak {
   display: none !important;
 }
+@-webkit-keyframes flickering {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+  }
+}
+/*-----------------------------*/
 body.ts-ext-popup {
   width: 250px;
   min-height: 70px;
-  padding: 15px;
+  outline: 1px solid #aaa;
 }
 body.ts-ext-popup .ts-popup-content {
+  padding: 15px;
+  outline: 1px dashed #aaa;
   text-align: center;
 }
 body.ts-ext-popup .dblock {
@@ -74,6 +87,23 @@ body.ts-ext-popup .dblock {
 }
 body.ts-ext-popup .dnone {
   display: none;
+}
+body.ts-ext-popup .header {
+  height: 20px;
+}
+body.ts-ext-popup .header .current-time {
+  float: right;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 9px;
+}
+body.ts-ext-popup .header .flickering {
+  /* this is only a cosmetical bullshit */
+  -webkit-animation: flickering 1.3s linear 0s infinite;
+  -moz-animation: flickering 1.3s linear 0s infinite;
+  -o-animation: flickering 1.3s linear 0s infinite;
+  -ms-animation: flickering 1.3s linear 0s infinite;
+  animation: flickering 1.3s linear 0s infinite;
 }
 .btn.start-day {
   margin: 0 auto;

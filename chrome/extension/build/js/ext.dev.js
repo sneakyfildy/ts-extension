@@ -35,7 +35,7 @@ define('common/dates',[
      */
     Dates.prototype.xx = function (value) {
         value = parseInt(value, 10);
-        return value < 10 ? '0' + value : value;
+        return value < 10 ? '0' + value : (value + '');
     };
 
     return new Dates();

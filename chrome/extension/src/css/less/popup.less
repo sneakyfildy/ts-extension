@@ -1,22 +1,51 @@
 /* hides angular not ready cloaked stuff in CSP mode */
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-  display: none !important;
+    display: none !important;
 }
+@-webkit-keyframes flickering {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0;
+    }
+}
+@header-height: 20px;
+
+
+/*-----------------------------*/
 
 body.ts-ext-popup{
     width: 250px;
     min-height: 70px;
-    padding: 15px;
+    outline: 1px solid #aaa;
     
     .ts-popup-content{
+        padding: 15px;
+        outline: 1px dashed #aaa;
         text-align: center;
     }
-    
+
     .dblock{
         display: block;
     }
     .dnone{
         display: none;
+    }
+
+    .header{
+        height: @header-height;
+        
+        .current-time{
+            float: right;
+            height: @header-height;
+            line-height: @header-height;
+            padding: 0 9px;
+        }
+        .flickering{
+            /* this is only a cosmetical bullshit */
+            .prefix(animation, flickering 1.3s linear 0s infinite);
+        }
     }
 }
 

@@ -3,31 +3,23 @@
 define([
     'common/dates'
 ], function (dates) {
-    function contentController($scope) {
-        var my = $scope;
-        my.startBtn = {
-            caption: 'Start',
-            onClick: function () {
-                console.log(new Date());
-                chrome.runtime.sendMessage(
-                    {action: 'ts_ext_popupStartButton', button: my.startBtn},
-                    onStartBtnResponse
-                );
-            }
+    function ContentController(){
+        this.onGetState = function(state){
+            this.applyState(state);
         };
 
-        chrome.runtime.sendMessage(
-            {action: 'ts_ext_getState'},
-            onGetState
-        );
+        this.onStartBtnClick = function () {
+            console.log(new Date());
+            chrome.runtime.sendMessage(
+                {action: 'ts_ext_popupStartButton', button: this.$scope.startBtn},
+                this.onStartBtnResponse.bind(this)
+            );
+        };
 
-        function onGetState(state){
-            my.applyState(state);
-        }
+        this.onStartBtnResponse = function(state){
+            this.applyState(state);
+        };
 
-        function onStartBtnResponse(state){
-            my.applyState(state);
-        }
         /**
          * Base applying
          * @param {Object} state
@@ -37,14 +29,14 @@ define([
          * @chainable
          * @returns {undefined}
          */
-        my.applyState = function(state){
-            my.started = state.started;
-            my.startTime = state.startTime;
-            my.endTime = state.endTime;
+        this.applyState = function(state){
+            this.$scope.started = state.started;
+            this.$scope.startTime = state.startTime;
+            this.$scope.endTime = state.endTime;
 
-            my.commitState();
-            my.$apply();
-            return my;
+            this.commitState();
+            this.$scope.$apply();
+            return this;
         };
         /**
          * Actions not directly affecting state (e.g. actions, which makes state params
@@ -52,14 +44,52 @@ define([
          * @returns {my}
          * @chainable
          */
-        my.commitState = function(){
-            my.startTimeHuman = dates.getFullDate( new Date(my.startTime) );
-            my.endTimeHuman = dates.getFullDate( new Date(my.endTime) );
+        this.commitState = function(){
+            this.$scope.startTimeHuman = dates.getFullDate( new Date(this.$scope.startTime) );
+            this.$scope.endTimeHuman = dates.getFullDate( new Date(this.$scope.endTime) );
 
-            my.startBtn.caption = my.started ? 'End' : 'Start';
-            return my;
+            this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
+            return this;
+        };
+
+        this.getState = function(){
+            chrome.runtime.sendMessage(
+                {action: 'ts_ext_getState'},
+                this.onGetState.bind(this)
+            );
+        };
+
+        this.startUpdateCurrentTime = function(){
+            this.updateTimeTick();
+        };
+
+        this.updateTimeTick = function(){
+            var date, prevMins, prevHours;
+            date = new Date();
+            prevHours = this.s.currentHours || '00';
+            prevMins = this.s.currentMins || '00';
+
+            this.s.currentHours = dates.xx( date.getHours() );
+            this.s.currentMins = dates.xx( date.getMinutes() );
+            if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
+                this.$timeout(this.s.$apply.bind(this.$scope));
+            }
+            this._clockTimeout = this.$timeout(this.updateTimeTick.bind(this), 1000);
         };
     }
 
-    return contentController;
+    ContentController.prototype.controllerConstructor = function($scope, $timeout){
+        var my = $scope;
+        this.$scope = this.scope = this.s = $scope;
+        this.$timeout = $timeout;
+        this.getState();
+        this.startUpdateCurrentTime();
+
+        my.startBtn = {
+            caption: 'Start',
+            onClick: this.onStartBtnClick.bind(this)
+        };
+    };
+
+    return new ContentController();
 });
