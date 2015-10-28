@@ -76,6 +76,14 @@ define([
             }
             this._clockTimeout = this.$timeout(this.updateTimeTick.bind(this), 1000);
         };
+
+        this.calculateTimezone = function(){
+            var date, tzInt, tzString;
+            date = new Date();
+            tzInt = date.getTimezoneOffset() * - 1;
+            tzString = (tzInt > 0 ? '+' : '-') + parseInt(tzInt / 60);
+            this.s.timezoneHuman = tzInt === 0 ? '' : tzString;
+        };
     }
 
     ContentController.prototype.controllerConstructor = function($scope, $timeout){
@@ -83,7 +91,9 @@ define([
         this.$scope = this.scope = this.s = $scope;
         this.$timeout = $timeout;
         this.getState();
+        this.calculateTimezone();
         this.startUpdateCurrentTime();
+
 
         my.startBtn = {
             caption: 'Start',
