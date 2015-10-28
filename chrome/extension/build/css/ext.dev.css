@@ -73,31 +73,45 @@
 }
 /*-----------------------------*/
 body.ts-ext-popup {
-  width: 250px;
+  width: 300px;
   min-height: 70px;
   outline: 1px solid #aaa;
 }
 body.ts-ext-popup .ts-popup-content {
-  padding: 15px;
+  padding: 5px;
   outline: 1px dashed #aaa;
-  text-align: center;
 }
-body.ts-ext-popup .dblock {
-  display: block;
+body.ts-ext-popup .ts-popup-content .content-line {
+  width: 100%;
+  outline: 1px solid red;
+  overflow: hidden;
+  line-height: 40px;
 }
-body.ts-ext-popup .dnone {
-  display: none;
+body.ts-ext-popup .ts-popup-content .content-line .line-left {
+  float: left;
+}
+body.ts-ext-popup .ts-popup-content .content-line .line-right {
+  float: right;
 }
 body.ts-ext-popup .header {
   height: 20px;
+  line-height: 20px;
+}
+body.ts-ext-popup .header .status {
+  float: left;
+}
+body.ts-ext-popup .header .status .started.green {
+  color: #0B9300;
+}
+body.ts-ext-popup .header .status .started.red {
+  color: #BF0B00;
 }
 body.ts-ext-popup .header .current-time {
   float: right;
   height: 20px;
-  line-height: 20px;
   padding: 0 9px;
 }
-body.ts-ext-popup .header .flickering {
+body.ts-ext-popup .header .current-time .flickering {
   /* this is only a cosmetical bullshit */
   -webkit-animation: flickering 1.3s linear 0s infinite;
   -moz-animation: flickering 1.3s linear 0s infinite;
@@ -105,6 +119,12 @@ body.ts-ext-popup .header .flickering {
   -ms-animation: flickering 1.3s linear 0s infinite;
   animation: flickering 1.3s linear 0s infinite;
 }
-.btn.start-day {
-  margin: 0 auto;
+body.ts-ext-popup .dblock {
+  display: block;
+}
+body.ts-ext-popup .dnone {
+  display: none;
+}
+body.ts-ext-popup .bold {
+  font-weight: bold;
 }

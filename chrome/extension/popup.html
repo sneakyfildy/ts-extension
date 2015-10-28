@@ -10,14 +10,26 @@
     </head>
     <body class="ts-ext-popup" ng-csp ng-cloak ng-controller="contentController">
         <div class="header">
+           <div class="status">
+               WD is <span class="started bold" ng-class="started ? 'green' : 'red'">{{started ? '' : 'not'}} started</span>
+            </div>
             <div class="current-time">
                 {{currentHours}}<span class="flickering">:</span>{{currentMins}}
             </div>
         </div>
-        <div class="ts-popup-content">            
-            <div class="start time" ng-class="started ? 'dblock' : 'dnone'">Start: {{startTimeHuman}}</div>
-            <div class="end time" ng-class="started ? 'dnone' : 'dblock'">End: {{endTimeHuman}}</div>
-            <div class="btn btn-default start-day" ng-click="startBtn.onClick($event)">{{startBtn.caption}}</div>
+        <div class="ts-popup-content"> 
+            <div class="content-line">                
+                <div class="line-right">
+                    <div class="start time" ng-class="started ? 'dblock' : 'dnone'">Last WD start: {{startTimeHuman}}</div>
+                    <div class="end time" ng-class="started ? 'dnone' : 'dblock'">Last WD end: {{endTimeHuman}}</div>
+                </div>
+                
+                <div class="line-left">
+                    <div class="btn btn-default start-day" ng-click="startBtn.onClick($event)" title="Start/end working day">
+                        {{startBtn.caption}} WD
+                    </div>
+                </div>
+            </div>
         </div>
         
         <script data-main="build/js/popup.dev" src="src/js/vendor/angular.js"></script>

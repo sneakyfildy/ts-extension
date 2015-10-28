@@ -11,44 +11,74 @@
     }
 }
 @header-height: 20px;
-
+@content-line-height: 40px;
 
 /*-----------------------------*/
 
 body.ts-ext-popup{
-    width: 250px;
+    width: 300px;
     min-height: 70px;
     outline: 1px solid #aaa;
-    
-    .ts-popup-content{
-        padding: 15px;
-        outline: 1px dashed #aaa;
-        text-align: center;
+
+    .btn.start-day{        
     }
 
+    .ts-popup-content{
+        padding: 5px;
+        outline: 1px dashed #aaa;
+
+        .content-line{
+            width: 100%;
+            outline: 1px solid red;
+            overflow: hidden;
+            line-height: @content-line-height;
+
+            .line-left{        
+                float: left;
+            }
+            .line-right{
+                float: right;
+            }
+        }
+    }
+    
+    .header{
+        height: @header-height;
+        line-height: @header-height;
+        
+        .status{
+            float: left;
+            
+            .started{
+                &.green{
+                    color: #0B9300;
+                }
+                &.red{
+                    color: #BF0B00;
+                }
+            }
+        }
+
+        .current-time{
+            float: right;
+            height: @header-height;            
+            padding: 0 9px;
+            .flickering{
+                /* this is only a cosmetical bullshit */
+                .prefix(animation, flickering 1.3s linear 0s infinite);
+            }
+        }
+
+    }
     .dblock{
         display: block;
     }
     .dnone{
         display: none;
     }
-
-    .header{
-        height: @header-height;
-        
-        .current-time{
-            float: right;
-            height: @header-height;
-            line-height: @header-height;
-            padding: 0 9px;
-        }
-        .flickering{
-            /* this is only a cosmetical bullshit */
-            .prefix(animation, flickering 1.3s linear 0s infinite);
-        }
+    .bold{
+        font-weight: bold;
     }
 }
 
-.btn.start-day{
-    margin: 0 auto;
-}
+
