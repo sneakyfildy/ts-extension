@@ -26,8 +26,8 @@ define([
 
         textArr = textArr.join(',');
 
-        console.log(textArr);
         this.copy(textArr);
+        return textArr;
     };
 
     RecordMaker.prototype.copy = function(text){

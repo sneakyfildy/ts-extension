@@ -102,6 +102,7 @@ define('popup/contentController',[
             this.$scope.started = state.started;
             this.$scope.startTime = state.startTime;
             this.$scope.endTime = state.endTime;
+            this.$scope.tickets = state.tickets;
 
             this.commitState();
             this.$scope.$apply();
@@ -118,6 +119,18 @@ define('popup/contentController',[
             this.$scope.endTimeHuman = dates.getFullDate( new Date(this.$scope.endTime) );
 
             this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
+
+            this.$scope.tickets.forEach(function(ticket){
+                var end = ticket.ended || new Date().getTime();
+                if (ticket.started){
+                    ticket.startTimeHuman = dates.getFullDate( new Date(+ticket.started) );
+                    ticket.duration = end - +ticket.started;
+                    ticket.durationHuman = Math.round( (ticket.duration / (1000 * 60)) ) + ' mins';
+                }
+                if (ticket.ended){
+                    ticket.endTimeHuman = dates.getFullDate( new Date(+ticket.ended) );
+                }
+            });
             return this;
         };
 
@@ -155,6 +168,18 @@ define('popup/contentController',[
             tzString = (tzInt > 0 ? '+' : '-') + parseInt(tzInt / 60);
             this.s.timezoneHuman = tzInt === 0 ? '' : tzString;
         };
+
+        this.setListeners = function(){
+            chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
+        };
+
+        this.onMessage = function(request){
+            switch(request.action){
+                case 'ts_ext_updateState':
+                    this.onGetState(request.state);
+                    break;
+            }
+        };
     }
 
     ContentController.prototype.controllerConstructor = function($scope, $timeout){
@@ -164,6 +189,7 @@ define('popup/contentController',[
         this.getState();
         this.calculateTimezone();
         this.startUpdateCurrentTime();
+        this.setListeners();
 
 
         my.startBtn = {

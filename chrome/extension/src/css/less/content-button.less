@@ -1,4 +1,10 @@
-#ts-btn-container{
+@-webkit-keyframes ts-ext-btn-rotate {
+    100% {
+        .transform(rotate(90deg));
+    }
+}
+@button-color: #BED4FF;
+.ts-btn-container{
     display: inline-block;
     margin-left: 10px;
     color: #BED4FF;
@@ -6,7 +12,13 @@
     
     .transition-add(color .1s ease-in-out);
     
-    &:active{
-        color: #fff;
+    &:hover{
+/*        .prefix(transform-origin, 50% 50%);
+        .prefix(animation, ts-ext-btn-rotate .5s ease-in-out 0s 1);*/
+        color: lighten(@button-color, 5%);
+        
+        &:active{
+            color: #fff;
+        }
     }
 }

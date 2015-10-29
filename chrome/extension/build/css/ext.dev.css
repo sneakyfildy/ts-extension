@@ -38,7 +38,16 @@
 /* 
 *	MERGING! .prefix-prop-prefixed
 */
-#ts-btn-container {
+@-webkit-keyframes ts-ext-btn-rotate {
+  100% {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+  }
+}
+.ts-btn-container {
   display: inline-block;
   margin-left: 10px;
   color: #BED4FF;
@@ -49,7 +58,12 @@
   -ms-transition: color 0.1s ease-in-out;
   transition: color 0.1s ease-in-out;
 }
-#ts-btn-container:active {
+.ts-btn-container:hover {
+  /*        .prefix(transform-origin, 50% 50%);
+        .prefix(animation, ts-ext-btn-rotate .5s ease-in-out 0s 1);*/
+  color: #d8e5ff;
+}
+.ts-btn-container:hover:active {
   color: #fff;
 }
 /* hides angular not ready cloaked stuff in CSP mode */

@@ -33,6 +33,12 @@
                     </div>
                 </div>
             </div>
+            <div class="content-line ticket" ng-repeat="ticket in tickets">
+                <div>ID: {{ticket.id}}</div>
+                <div>Subject: {{ticket.subject}}</div>
+                <div>Started: {{ticket.startTimeHuman}}</div>
+                <div>Duration: {{ticket.durationHuman}}</div>
+            </div>
         </div>
         
         <script data-main="build/js/popup.dev" src="src/js/vendor/angular.js"></script>
