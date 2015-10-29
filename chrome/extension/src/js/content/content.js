@@ -1,8 +1,8 @@
 /* global chrome */
 
 (function(g){
-    var buttonId = 'ts-btn-container';
-    var buttonText = '+';
+    var exportButtonId = 'ts-btn-container';
+    var exportButtonText = '+';
     var notFound = 'unknown';
     var store = {};
     try{
@@ -23,11 +23,19 @@
      * @returns {Boolean}
      */
     function detectRequestTracker(){
-        var logoEl, linkEl;
+        var logoEl, linkEl, bodyEl, summaryEl;
+
         logoEl = d.getElementById('logo');
         if (!logoEl){return false;}
+
         linkEl = logoEl.getElementsByTagName('a')[0];
         if (!linkEl){return false;}
+
+        bodyEl = document.getElementById('body');
+        if (!bodyEl){return false;}
+
+        summaryEl = document.querySelector('.ticket-summary');
+        if (!summaryEl){return false;}
          // enough I think
         return linkEl.getAttribute('href').match(/bestpractical/) !== null;
     }
@@ -40,7 +48,7 @@
             sendResponse(data);
         });
 
-         d.getElementById(buttonId).addEventListener('click', onButtonClick);
+         d.getElementById(exportButtonId).addEventListener('click', onButtonClick);
     }
 
     function collectTicketData(){
@@ -66,9 +74,9 @@
         // keep
         store['subject'] = header.textContent.trim().replace(/^#\d+:/gim, '').trim();
         button = d.createElement('div');
-        button.setAttribute('id', buttonId);
+        button.setAttribute('id', exportButtonId);
         button.setAttribute('title', 'Form TS record and copy to clipboard');
-        button.innerHTML = '<span>' + buttonText + '</span>';
+        button.innerHTML = '<span>' + exportButtonText + '</span>';
         header.appendChild(button);
     }
 

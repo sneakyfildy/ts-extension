@@ -4,7 +4,26 @@ define('common/dates',[
 ], function(){
     function Dates(){
     }
-
+    Dates.prototype.weekdays = {
+        full: [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        ],
+        short: [
+            'Sun',
+            'Mon',
+            'Tue',
+            'Wed',
+            'Thu',
+            'Fri',
+            'Sat'
+        ]
+    };
     Dates.prototype.getFullDate = function (date, needSex) {
         return this.getHumanDate(date) + ' ' + this.getHumanTime(date, needSex);
     };
@@ -38,6 +57,11 @@ define('common/dates',[
         return value < 10 ? '0' + value : (value + '');
     };
 
+    Dates.prototype.getDayName = function(date, short){
+        var d = date || new Date();
+        return this.weekdays[short ? 'short' : 'full'][d.getDay()];
+    };
+    
     return new Dates();
 
 });
@@ -116,6 +140,8 @@ define('popup/contentController',[
 
             this.s.currentHours = dates.xx( date.getHours() );
             this.s.currentMins = dates.xx( date.getMinutes() );
+
+            this.s.dayNameFull = dates.getDayName(date);
             if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
                 this.$timeout(this.s.$apply.bind(this.$scope));
             }

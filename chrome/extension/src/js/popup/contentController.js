@@ -71,6 +71,8 @@ define([
 
             this.s.currentHours = dates.xx( date.getHours() );
             this.s.currentMins = dates.xx( date.getMinutes() );
+
+            this.s.dayNameFull = dates.getDayName(date);
             if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
                 this.$timeout(this.s.$apply.bind(this.$scope));
             }

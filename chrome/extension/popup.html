@@ -15,6 +15,7 @@
                WD is <span class="started bold" ng-class="started ? 'green' : 'red'">{{started ? '' : 'not'}} started</span>
             </div>
             <div class="current-time">
+                {{dayNameFull}}&nbsp;
                 {{currentHours}}<span class="flickering">:</span>{{currentMins}}
                 <span class="not-important-forever italic"> (UTC{{timezoneHuman}})</span>
             </div>
