@@ -12,10 +12,9 @@
         var d;
         d = g.document;
 
-        if ( detectRequestTracker() ) {
-            addButtons();
-            setListeners();
-        }
+        addButtons();
+        setListeners();
+
     }catch(err){
         console.error(err); // disable on prod
         // sad, but safe
@@ -25,24 +24,6 @@
      * a subject of this extension - if we can add a button.
      * @returns {Boolean}
      */
-    function detectRequestTracker(){
-        var logoEl, linkEl, bodyEl, summaryEl;
-
-        logoEl = d.getElementById('logo');
-        if (!logoEl){return false;}
-
-        linkEl = logoEl.getElementsByTagName('a')[0];
-        if (!linkEl){return false;}
-
-        bodyEl = document.getElementById('body');
-        if (!bodyEl){return false;}
-
-        summaryEl = document.querySelector('.ticket-summary');
-        if (!summaryEl){return false;}
-         // enough I think
-        return linkEl.getAttribute('href').match(/bestpractical/) !== null;
-    }
-
     function setListeners(){
         chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
             var text = msg['text'];
