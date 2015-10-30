@@ -106,10 +106,10 @@ define('common/dates',[
 
 /* global chrome */
 
-define('popup/contentController',[
+define('options/optionsController',[
     'common/dates'
 ], function (dates) {
-    function ContentController(){
+    function OptionsController(){
         this.onGetState = function(state){
             this.applyState(state);
         };
@@ -136,10 +136,13 @@ define('popup/contentController',[
          * @returns {undefined}
          */
         this.applyState = function(state){
-            this.$scope.started = state.started;
-            this.$scope.startTime = state.startTime;
-            this.$scope.endTime = state.endTime;
-            this.$scope.tickets = state.tickets;
+            this.$scope.opts = {
+                rt_link: {
+                    name: 'rt_link',
+                    value: void(0)
+                }
+            };
+
 
             this.commitState();
             this.$scope.$apply();
@@ -152,27 +155,6 @@ define('popup/contentController',[
          * @chainable
          */
         this.commitState = function(){
-            var sd, ed;
-            sd = new Date(this.$scope.startTime);
-            ed = new Date(this.$scope.endTime);
-            this.$scope.wdStartTimeHuman = dates.getHumanTime( sd );
-            this.$scope.wdStartDateHuman = dates.getHumanDate( sd );
-            this.$scope.wdEndTimeHuman = dates.getHumanTime( ed );
-            this.$scope.wdEndDateHuman = dates.getHumanDate( ed );
-
-            this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
-
-            this.$scope.tickets.forEach(function(ticket){
-                var end = ticket.ended || new Date().getTime();
-                if (ticket.started){
-                    ticket.startTimeHuman = dates.getFullDate( new Date(+ticket.started) );
-                    ticket.duration = end - +ticket.started;
-                    ticket.durationHuman = Math.round( (ticket.duration / (1000 * 60)) ) + ' mins';
-                }
-                if (ticket.ended){
-                    ticket.endTimeHuman = dates.getFullDate( new Date(+ticket.ended) );
-                }
-            });
             return this;
         };
 
@@ -181,36 +163,6 @@ define('popup/contentController',[
                 {action: 'ts_ext_getState'},
                 this.onGetState.bind(this)
             );
-        };
-
-        this.startUpdateCurrentTime = function(){
-            this.updateTimeTick();
-        };
-
-        this.updateTimeTick = function(){
-            var date, prevMins, prevHours;
-            date = new Date();
-            prevHours = this.s.currentHours || '00';
-            prevMins = this.s.currentMins || '00';
-
-            this.s.currentHours = dates.xx( date.getHours() );
-            this.s.currentMins = dates.xx( date.getMinutes() );
-
-            var dayNameFull = dates.getDayName(date);
-            var monthNameShort = dates.getMonthName(date, {short: true});
-            this.s.headerDateString = dayNameFull + ' ' + monthNameShort + ' ' + dates.xx(date.getDate());
-            if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
-                this.$timeout(this.s.$apply.bind(this.$scope));
-            }
-            this._clockTimeout = this.$timeout(this.updateTimeTick.bind(this), 1000);
-        };
-
-        this.calculateTimezone = function(){
-            var date, tzInt, tzString;
-            date = new Date();
-            tzInt = date.getTimezoneOffset() * - 1;
-            tzString = (tzInt > 0 ? '+' : '-') + parseInt(tzInt / 60);
-            this.s.timezoneHuman = tzInt === 0 ? '' : tzString;
         };
 
         this.setListeners = function(){
@@ -226,43 +178,39 @@ define('popup/contentController',[
         };
     }
 
-    ContentController.prototype.controllerConstructor = function($scope, $timeout){
+    OptionsController.prototype.controllerConstructor = function($scope){
         var my = $scope;
         this.$scope = this.scope = this.s = $scope;
-        this.$timeout = $timeout;
         this.getState();
-        this.calculateTimezone();
-        this.startUpdateCurrentTime();
-        this.setListeners();
 
-
+        my.content = 'content';
         my.startBtn = {
             caption: 'Start',
             onClick: this.onStartBtnClick.bind(this)
         };
     };
 
-    return new ContentController();
+    return new OptionsController();
 });
 
 /* global angular */
 
-define('popup/popAppModule',['popup/contentController'], function(contentController){
-    var popApp = angular.module('popApp', []);
-    popApp.controller('contentController', ['$scope', '$timeout',contentController.controllerConstructor.bind(contentController)]);
+define('options/optsAppModule',['options/optionsController'], function(optionsController){
+    var popApp = angular.module('optsApp', []);
+    popApp.controller('optionsController', ['$scope',optionsController.controllerConstructor.bind(optionsController)]);
 
     angular.element(document).ready(function () {
-        angular.bootstrap(document, ['popApp']);
+        angular.bootstrap(document, ['optsApp']);
     });
 });
 /**
- * This is the main JS file for popup script, it is a subject to grunt's build routine.
+ * This is the main JS file for options script, it is a subject to grunt's build routine.
  */
 
 require([
-    'popup/popAppModule'
+    'options/optsAppModule'
 ], function(){
 });
 
-define("PopupMain", function(){});
+define("OptionsMain", function(){});
 

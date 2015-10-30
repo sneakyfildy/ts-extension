@@ -46,8 +46,13 @@ define([
          * @chainable
          */
         this.commitState = function(){
-            this.$scope.startTimeHuman = dates.getFullDate( new Date(this.$scope.startTime) );
-            this.$scope.endTimeHuman = dates.getFullDate( new Date(this.$scope.endTime) );
+            var sd, ed;
+            sd = new Date(this.$scope.startTime);
+            ed = new Date(this.$scope.endTime);
+            this.$scope.wdStartTimeHuman = dates.getHumanTime( sd );
+            this.$scope.wdStartDateHuman = dates.getHumanDate( sd );
+            this.$scope.wdEndTimeHuman = dates.getHumanTime( ed );
+            this.$scope.wdEndDateHuman = dates.getHumanDate( ed );
 
             this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
 
@@ -85,7 +90,9 @@ define([
             this.s.currentHours = dates.xx( date.getHours() );
             this.s.currentMins = dates.xx( date.getMinutes() );
 
-            this.s.dayNameFull = dates.getDayName(date);
+            var dayNameFull = dates.getDayName(date);
+            var monthNameShort = dates.getMonthName(date, {short: true});
+            this.s.headerDateString = dayNameFull + ' ' + monthNameShort + ' ' + dates.xx(date.getDate());
             if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
                 this.$timeout(this.s.$apply.bind(this.$scope));
             }

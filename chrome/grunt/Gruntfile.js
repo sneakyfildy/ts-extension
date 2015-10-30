@@ -26,6 +26,17 @@ module.exports = function(grunt) {
 				files: {
 					'extension/build/css/ext.min.css': 'extension/src/css/less/main.less'
 				}
+			},
+			content_page_prod: {
+				options: {
+					cleancss: true,
+					compress: true,
+					strictMath: true,
+					strictUnits: true
+				},
+				files: {
+					'extension/build/css/content.min.css': 'extension/src/css/less/content.less'
+				}
 			}
 		},
         requirejs: {
@@ -55,6 +66,13 @@ module.exports = function(grunt) {
                     optimize: 'none',
                     out: 'extension/build/js/popup.dev.js',
                     name: 'PopupMain'
+                }
+            },
+            options_page_dev:{
+                options:{
+                    optimize: 'none',
+                    out: 'extension/build/js/options.dev.js',
+                    name: 'OptionsMain'
                 }
             }
         },

@@ -24,6 +24,36 @@ define([
             'Sat'
         ]
     };
+    Dates.prototype.months = {
+        full: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'Decemeber'
+        ],
+        short: [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+        ]
+    };
     Dates.prototype.getFullDate = function (date, needSex) {
         return this.getHumanDate(date) + ' ' + this.getHumanTime(date, needSex);
     };
@@ -57,11 +87,18 @@ define([
         return value < 10 ? '0' + value : (value + '');
     };
 
-    Dates.prototype.getDayName = function(date, short){
+    Dates.prototype.getDayName = function(date, opts){
+        opts = opts || {};
         var d = date || new Date();
-        return this.weekdays[short ? 'short' : 'full'][d.getDay()];
+        return this.weekdays[opts.short ? 'short' : 'full'][d.getDay()];
     };
-    
+    Dates.prototype.getMonthName = function(date, opts){
+        opts = opts || {};
+        var d = date || new Date();
+        return this.months[opts.short ? 'short' : 'full'][d.getMonth()];
+    };
+
+
     return new Dates();
 
 });
