@@ -112,6 +112,7 @@ define('background/record',[
 
     RecordMaker.prototype.make = function(details){
         var dateFormatted, date, month, day, endTime, startTime, hours, mins;
+        details.subject = this.sanitizeSubject(details.subject);
         var textArr = [details.queue, details.id, details.subject];
 
         textArr[1] = 'RT:' + textArr[1];
@@ -146,6 +147,13 @@ define('background/record',[
         document.execCommand('SelectAll');
         document.execCommand("Copy", false, null);
         document.body.removeChild(copyDiv);
+    };
+
+    RecordMaker.prototype.sanitizeSubject = function(before){
+        var after;
+
+        after = before.replace(/"/gim, '\'');
+        return after;
     };
 
     return new RecordMaker();
