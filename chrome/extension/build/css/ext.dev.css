@@ -98,17 +98,16 @@ body.ts-ext {
 body.ts-ext-popup {
   width: 320px;
   min-height: 70px;
-  outline: 1px solid #aaa;
 }
 body.ts-ext-popup .ts-popup-content {
   padding: 5px;
-  outline: 1px dashed #aaa;
 }
 body.ts-ext-popup .ts-popup-content .content-line {
   width: 100%;
-  outline: 1px solid red;
   overflow: hidden;
   line-height: 40px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
 }
 body.ts-ext-popup .ts-popup-content .content-line .line-left {
   float: left;
@@ -124,6 +123,7 @@ body.ts-ext-popup .header {
   height: 20px;
   line-height: 20px;
   font-size: 0.8em;
+  border-bottom: 1px solid #eee;
 }
 body.ts-ext-popup .header .status {
   float: left;

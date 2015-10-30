@@ -18,21 +18,20 @@
 body.ts-ext-popup{
     width: 320px;
     min-height: 70px;
-    outline: 1px solid #aaa;
     
     .btn.start-day{        
     }
 
     .ts-popup-content{
         padding: 5px;
-        outline: 1px dashed #aaa;
 
         .content-line{
             width: 100%;
-            outline: 1px solid red;
             overflow: hidden;
             line-height: @content-line-height;
-
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+            
             .line-left{        
                 float: left;
             }
@@ -50,6 +49,7 @@ body.ts-ext-popup{
         height: @header-height;
         line-height: @header-height;
         font-size: 0.8em;
+        border-bottom: 1px solid #eee;
         
         .status{
             float: left;
