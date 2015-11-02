@@ -40,7 +40,10 @@
                 </div>
             </div>
             <div class="content-line ticket" ng-repeat="ticket in tickets">
-                <div>#{{ticket.id}}</div>
+                <div ng-class="ticket.idLink ? 'dnone' : 'dblock'">#{{ticket.id}}</div>
+                <div ng-class="ticket.idLink ? 'dblock' : 'dnone'">
+                    <a href="#" data-link="{{ticket.idLink}}">#{{ticket.id}}</a>
+                </div>
                 <div>{{ticket.subject}}</div>
                 <div>Started: {{ticket.startTimeHuman}}</div>
                 <div>Duration: {{ticket.durationHuman}}</div>

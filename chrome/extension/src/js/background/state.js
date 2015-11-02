@@ -79,9 +79,8 @@ define([
         this.d.tickets.push(ticket);
 
         this.setState();
-        chrome.runtime.sendMessage(
-            {action: 'ts_ext_updateState', state: this.d}
-        );
+        this.broadcastUpdateState();
+
         var n = new Notification('Ticket started', {
             icon: 'img/icon48.png',
             body: ticket.id + ': ' + ticket.subject
@@ -100,6 +99,27 @@ define([
             return item.id === id;
         })[0];
     };
+    /**
+     *
+     * @param {Object} opts
+     * @returns {Object} State
+     */
+    State.prototype.setOptions = function (opts) {
+        var d = this.d;
+        opts = opts || opts;
+        this.d.opts = opts;
+        
+        this.setState();
+        this.broadcastUpdateState();
+
+        return this.getState();
+    };
+
+    State.prototype.broadcastUpdateState = function () {
+        chrome.runtime.sendMessage(
+            {action: 'ts_ext_updateState', state: this.d}
+        );
+    };
 
     State.prototype.restoreState = function () {
         var state = this.getState();
@@ -111,8 +131,9 @@ define([
     State.prototype.setState = function () {
         ls.setItem('state', this.d);
     };
+
     State.prototype.getState = function () {
-        return ls.getItem('state');
+        return ls.getItem('state') || {};
     };
 
     return new State().init();

@@ -8,12 +8,31 @@ define([
             this.applyState(state);
         };
 
-        this.onStartBtnClick = function () {
-            console.log(new Date());
-            chrome.runtime.sendMessage(
-                {action: 'ts_ext_popupStartButton', button: this.$scope.startBtn},
-                this.onStartBtnResponse.bind(this)
-            );
+        this.onSaveBtnClick = function () {
+            this.$scope.opts = this.$scope.opts || {};
+            var $fields = $('.options-field');
+            var me = this;
+            $fields.each(function(){
+               var $field = $(this);
+               var fieldName = $field.attr('data-fieldname');
+               var fieldValue;
+               if (fieldName && me.$scope.opts[fieldName]){
+                   fieldValue = $field.val();
+                   switch(fieldName){
+                       // string -> vars
+                       case 'rt_link':
+                           fieldValue = fieldValue.replace(/\/+$/, ''); // strip last slash(es)
+                           if ( fieldValue && !fieldValue.match(/^https{0,1}:\/\//)){
+                               fieldValue = 'http://' + fieldValue;
+                           }
+                           break;
+                   }
+                   me.$scope.opts[fieldName] = me.$scope.opts[fieldName] || {};
+                   me.$scope.opts[fieldName].value = fieldValue;
+               }
+            });
+            console.log(this.$scope.opts);
+            this.setOptions();
         };
 
         this.onStartBtnResponse = function(state){
@@ -30,13 +49,13 @@ define([
          * @returns {undefined}
          */
         this.applyState = function(state){
-            this.$scope.opts = {
+            var defaultOpts = {
                 rt_link: {
                     name: 'rt_link',
                     value: void(0)
                 }
             };
-
+            this.$scope.opts = state.opts || defaultOpts;
 
             this.commitState();
             this.$scope.$apply();
@@ -58,7 +77,13 @@ define([
                 this.onGetState.bind(this)
             );
         };
-
+        this.setOptions = function(){
+            // there will be 'updateState' broadcast from background after saving
+            // that's why no callback here
+            chrome.runtime.sendMessage(
+                {action: 'ts_ext_setOptions', opts: this.$scope.opts}
+            );
+        };
         this.setListeners = function(){
             chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
         };
@@ -75,12 +100,12 @@ define([
     OptionsController.prototype.controllerConstructor = function($scope){
         var my = $scope;
         this.$scope = this.scope = this.s = $scope;
+        this.setListeners();
         this.getState();
 
         my.content = 'content';
-        my.startBtn = {
-            caption: 'Start',
-            onClick: this.onStartBtnClick.bind(this)
+        my.saveBtn = {
+            onClick: this.onSaveBtnClick.bind(this)
         };
     };
 

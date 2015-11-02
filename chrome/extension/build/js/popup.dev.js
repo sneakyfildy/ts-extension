@@ -140,6 +140,7 @@ define('popup/contentController',[
             this.$scope.startTime = state.startTime;
             this.$scope.endTime = state.endTime;
             this.$scope.tickets = state.tickets;
+            this.$scope.opts = state.opts || {};
 
             this.commitState();
             this.$scope.$apply();
@@ -152,13 +153,18 @@ define('popup/contentController',[
          * @chainable
          */
         this.commitState = function(){
-            var sd, ed;
-            sd = new Date(this.$scope.startTime);
-            ed = new Date(this.$scope.endTime);
-            this.$scope.wdStartTimeHuman = dates.getHumanTime( sd );
-            this.$scope.wdStartDateHuman = dates.getHumanDate( sd );
-            this.$scope.wdEndTimeHuman = dates.getHumanTime( ed );
-            this.$scope.wdEndDateHuman = dates.getHumanDate( ed );
+            var sd, ed, s;
+            s = this.$scope;
+            if ( this.$scope.startTime ){
+                sd = new Date(this.$scope.startTime);
+                this.$scope.wdStartTimeHuman = dates.getHumanTime( sd );
+                this.$scope.wdStartDateHuman = dates.getHumanDate( sd );
+            }
+            if ( this.$scope.endTime  ){
+                ed = new Date(this.$scope.endTime);
+                this.$scope.wdEndTimeHuman = dates.getHumanTime( ed );
+                this.$scope.wdEndDateHuman = dates.getHumanDate( ed );
+            }
 
             this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
 
@@ -171,6 +177,11 @@ define('popup/contentController',[
                 }
                 if (ticket.ended){
                     ticket.endTimeHuman = dates.getFullDate( new Date(+ticket.ended) );
+                }
+                if (s.opts.rt_link && s.opts.rt_link.value){
+                    ticket.idLink = s.opts.rt_link.value+'/Ticket/Display.html?id='+ticket.id;
+                }else{
+                    ticket.idLink = null;
                 }
             });
             return this;
@@ -215,6 +226,7 @@ define('popup/contentController',[
 
         this.setListeners = function(){
             chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
+            $(document).on('click', 'a', this.onLinkClick.bind(this));
         };
 
         this.onMessage = function(request){
@@ -223,6 +235,20 @@ define('popup/contentController',[
                     this.onGetState(request.state);
                     break;
             }
+        };
+
+        this.onLinkClick = function(e){
+            // for some reason 'data-href' is not being processed by that weird angular thing
+            var link = $(e.currentTarget).attr('data-link');
+            link && this.goToLink(link);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        this.goToLink = function goToLink(link){
+            chrome.tabs.create({
+                url:link
+            });
         };
     }
 
