@@ -1,11 +1,12 @@
 /* global chrome */
 
 (function(g){
-    var pageTypeByUrl, addTagContainerId, addTagContainerCls, tagButtonCls, tagControlButtonCls;
+    var ticketButtonsContainerId, pageTypeByUrl, addTagContainerId, addTagContainerCls, tagButtonCls, tagControlButtonCls;
 
+    ticketButtonsContainerId = 'ts-ticket-buttons-container';
     var exportButtonId = 'ts-ext-export-btn';
     var buttonCls = 'ts-btn-container';
-    var exportButtonText = '+';
+    var exportButtonText = 'clipboard';
     var startButtonId = 'ts-ext-start-button';
     var stopButtonId = 'ts-ext-stop-button';
     var notFound = 'unknown';
@@ -37,6 +38,7 @@
 
     function processDisplayPage(){
         if ( detectRequestTracker() ) {
+            addTicketButtonsContainer();
             addDisplayPageButtons();
         }
     }
@@ -126,9 +128,19 @@
         addTagButtons();
     }
 
+    function addTicketButtonsContainer(){
+        var header, container;
+        header = d.querySelectorAll('#page-navigation #page-menu')[0];
+
+        container = d.createElement('li');
+        container.setAttribute('id', ticketButtonsContainerId);
+        header.insertBefore(container, header.firstChild);
+    }
+
     function addExportButton(){
-        var header, button;
+        var header, container, button;
         header = d.getElementById('header');
+        container = d.getElementById(ticketButtonsContainerId);
         header = header.getElementsByTagName('h1')[0];
         // keep
         store['subject'] = header.textContent.trim().replace(/^#\d+:/gim, '').trim();
@@ -137,26 +149,25 @@
         button.setAttribute('class', buttonCls);
         button.setAttribute('title', 'Form TS record and copy to clipboard');
         button.innerHTML = '<span>' + exportButtonText + '</span>';
-        header.appendChild(button);
+        container.appendChild(button);
     }
     function addStartStopButtons(){
-        var header, button;
-        header = d.getElementById('header');
-        header = header.getElementsByTagName('h1')[0];
+        var container, button;
+        container = d.getElementById(ticketButtonsContainerId);
 
         button = d.createElement('div');
         button.setAttribute('id', startButtonId);
         button.setAttribute('class', buttonCls);
         button.setAttribute('title', 'Start ticket');
         button.innerHTML = '<span>' + 'start' + '</span>';
-        header.appendChild(button);
+        container.appendChild(button);
 
         button = d.createElement('div');
         button.setAttribute('id', stopButtonId);
         button.setAttribute('class', buttonCls);
         button.setAttribute('title', 'Stop ticket');
         button.innerHTML = '<span>' + 'stop' + '</span>';
-        header.appendChild(button);
+        container.appendChild(button);
     }
 
     function addTagButtons(){

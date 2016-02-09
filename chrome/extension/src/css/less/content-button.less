@@ -3,23 +3,33 @@
         .transform(rotate(90deg));
     }
 }
-@button-color: #BED4FF;
+@button-color: #444;
+@button-hover: #EF7D00;
+
+#ts-ticket-buttons-container{
+    padding: .6em 1em;
+    border: 1px dashed #ccc;
+}
 .ts-btn-container{
+    font: 13px/1.231 arial,helvetica,clean,sans-serif;
     display: inline-block;
-    margin-left: 10px;
-    color: #BED4FF;
+    margin-left: 10px !important;    
+    color: @button-color;
     cursor: pointer;
     
-    .transition-add(color .1s ease-in-out);
+    
+    .transition-add(color .3s ease-in-out);
+    
+    &:first-child{
+        margin-left: 0px !important;
+    }
     
     &:hover{
-/*        .prefix(transform-origin, 50% 50%);
-        .prefix(animation, ts-ext-btn-rotate .5s ease-in-out 0s 1);*/
-        color: lighten(@button-color, 5%);
-        
-        &:active{
-            color: #fff;
-        }
+        color: @button-hover
+    }
+    
+    span{
+        border-bottom: 1px dashed;
     }
 }
 
