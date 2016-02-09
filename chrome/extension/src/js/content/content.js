@@ -1,6 +1,8 @@
 /* global chrome */
 
 (function(g){
+    var pageTypeByUrl, addTagContainerId, addTagContainerCls, tagButtonCls, tagControlButtonCls;
+
     var exportButtonId = 'ts-ext-export-btn';
     var buttonCls = 'ts-btn-container';
     var exportButtonText = '+';
@@ -8,17 +10,38 @@
     var stopButtonId = 'ts-ext-stop-button';
     var notFound = 'unknown';
     var store = {};
+
+    addTagContainerId = 'ts-add-tag-container-' + Math.floor((Math.random() * 10e13));
+    addTagContainerCls = 'ts-add-tag-container';
+    tagButtonCls = 'ts-tag-btn';
+    tagControlButtonCls = 'ts-tag-control-btn';
     try{
         var d;
         d = g.document;
+        pageTypeByUrl = getPageType();
 
-        if ( detectRequestTracker() ) {
-            addButtons();
-            setListeners();
+        switch(pageTypeByUrl){
+            case 'display':
+                processDisplayPage();
+                break;
+            case 'modify':
+                processModifyPage();
+                break;
         }
+        setListeners(pageTypeByUrl);
+
     }catch(err){
         console.error(err); // disable on prod
         // sad, but safe
+    }
+
+    function processDisplayPage(){
+        if ( detectRequestTracker() ) {
+            addDisplayPageButtons();
+        }
+    }
+    function processModifyPage(){
+        addModifyPageButtons();
     }
     /**
      * Tries to check if this page is a Reuqest Tracker page, which can be
@@ -43,16 +66,39 @@
         return linkEl.getAttribute('href').match(/bestpractical/) !== null;
     }
 
-    function setListeners(){
-        chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
-            var text = msg['text'];
-            if (!text || text !== "tsGetDetails") { return; }
-            var data = collectTicketData();
-            sendResponse(data);
-        });
+    function getPageType(){
+        var url;
+        url = document.location.href;
+        if (url.match(/rt\/Ticket\/Modify.html/) !== null){
+            return 'modify';
+        }
 
-        d.getElementById(exportButtonId).addEventListener('click', onExportButtonClick);
-        d.getElementById(startButtonId).addEventListener('click', onStartButtonClick);
+        if (url.match(/rt\/Ticket\/Display.html/) !== null){
+            return 'display';
+        }
+    }
+
+    function setListeners(pageType){
+        switch (pageType){
+            case 'modify':
+                d.getElementById(addTagContainerId).addEventListener('click', onTagButtonClick);
+
+                break;
+            case 'display':
+                chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+                var text = msg['text'];
+                    if (!text || text !== "tsGetDetails") { return; }
+                    var data = collectTicketData();
+                    sendResponse(data);
+                });
+                try{
+                    d.getElementById(exportButtonId).addEventListener('click', onExportButtonClick);
+                    d.getElementById(startButtonId).addEventListener('click', onStartButtonClick);
+                }catch(err){}
+
+                break;
+        }
+
     }
 
     function collectTicketData(){
@@ -71,10 +117,15 @@
         return !el ? notFound : (el.textContent || notFound).replace(/[\s\t\n]/gim, '');
     }
 
-    function addButtons(){
+    function addDisplayPageButtons(){
         addExportButton();
         addStartStopButtons();
     }
+
+    function addModifyPageButtons(){
+        addTagButtons();
+    }
+
     function addExportButton(){
         var header, button;
         header = d.getElementById('header');
@@ -107,6 +158,62 @@
         button.innerHTML = '<span>' + 'stop' + '</span>';
         header.appendChild(button);
     }
+
+    function addTagButtons(){
+        var tagInputContainer, buttonArea, tags;
+        tagInputContainer = d.querySelectorAll('.edit-custom-fields .edit-custom-field .entry')[0];
+
+        if (!tagInputContainer){
+            return;
+        }
+
+        tags = ['CodeReview', 'SomethingElse'];
+        buttonArea = d.createElement('div');
+        buttonArea.setAttribute('id', addTagContainerId);
+        buttonArea.setAttribute('class', addTagContainerCls);
+
+        tags.forEach(function(tagName){
+            var tagButtonOuter, tagButtonInner;
+            tagButtonOuter = d.createElement('div');
+            tagButtonInner = d.createElement('span');
+
+            tagButtonOuter.setAttribute('class', tagButtonCls);
+            tagButtonInner.setAttribute('data-value', tagName);
+            tagButtonInner.setAttribute('data-type', 'tag');
+            tagButtonInner.innerHTML = tagName;
+            tagButtonOuter.appendChild(tagButtonInner);
+            buttonArea.appendChild(tagButtonOuter);
+        });
+        tagInputContainer.appendChild(buttonArea);
+
+        addTagControlButtons(buttonArea);
+    }
+
+    function addTagControlButtons(buttonArea){
+        var tagInputContainer, controls;
+        if (!buttonArea){
+            return;
+        }
+
+        controls = [
+            {
+                name: 'clear',
+                title: 'Clear'
+            }
+        ];
+
+        controls.forEach(function(controlDef){
+            var controlButtonOuter, controlButtonInner;
+            controlButtonOuter = d.createElement('div');
+            controlButtonInner = d.createElement('span');
+            controlButtonOuter.setAttribute('class', tagControlButtonCls);
+            controlButtonInner.setAttribute('data-value', controlDef.name);
+            controlButtonInner.setAttribute('data-type', 'control');
+            controlButtonInner.innerHTML = controlDef.title;
+            controlButtonOuter.appendChild(controlButtonInner);
+            buttonArea.insertBefore(controlButtonOuter, buttonArea.firstChild);
+        });
+    }
     function onExportButtonClick(){
         var data = collectTicketData() || {};
         data.action = 'ts_ext_ticketDetails';
@@ -121,6 +228,40 @@
         chrome.runtime.sendMessage(data, function(answer) {
             console.log(answer);
         });
+    }
+
+    function onTagButtonClick(event){
+        var tagInputContainer, tagInput, clicked, tag, btnType, btnValue;
+        clicked = event.target;
+        btnType = clicked && clicked.getAttribute('data-type');
+        tagInputContainer = d.querySelectorAll('.edit-custom-fields .edit-custom-field .entry')[0];
+        if (!tagInputContainer){
+            return;
+        }
+
+        tagInput = tagInputContainer.querySelectorAll('textarea')[0];
+        if (!tagInput){
+            return;
+        }
+
+        switch(btnType){
+            case 'tag':
+                tag = clicked && clicked.getAttribute('data-value');
+                if ( tagInput.value === '\n' ){
+                    tagInput.value = '';
+                }
+                tagInput.value += tag + '\n';
+                break;
+            case 'control':
+                btnValue = clicked && clicked.getAttribute('data-value');
+
+                if (btnValue === 'clear'){
+                    tagInput.value = '\n';
+                    return;
+                }
+
+                break;
+        }
     }
 
 })(window);
