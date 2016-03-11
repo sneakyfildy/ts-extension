@@ -6,7 +6,8 @@
     "grunt-contrib-less": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-contrib-requirejs": "latest",
-    "grunt-closure-compiler": "latest"
+    "grunt-closure-compiler": "latest",
+    "amdclean": "*"
   },
   "description": "ERROR: No README data found!",
   "author": "IPONWEB"

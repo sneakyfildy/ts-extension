@@ -19,13 +19,13 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["src/js/content/content.js"],
+            "js": ["build/js/content.dev.js"],
             "css": ["build/css/content.min.css"]
         }
     ],
     "web_accessible_resources":[
         "build/js/*.js.map",
-        "src/js/content/content.js"
+        "build/js/content.dev.js"
     ],
     "permissions": [
         "contextMenus",

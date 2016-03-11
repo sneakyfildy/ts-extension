@@ -62,7 +62,7 @@ define([
 
             this.$scope.startBtn.caption = this.$scope.started ? 'End' : 'Start';
 
-            this.$scope.tickets.forEach(function(ticket){
+            (this.$scope.tickets || []).forEach(function(ticket){
                 var end = ticket.ended || new Date().getTime();
                 if (ticket.started){
                     ticket.startTimeHuman = dates.getFullDate( new Date(+ticket.started) );

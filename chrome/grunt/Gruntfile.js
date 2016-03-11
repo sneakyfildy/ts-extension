@@ -74,12 +74,29 @@ module.exports = function(grunt) {
                     out: 'extension/build/js/options.dev.js',
                     name: 'OptionsMain'
                 }
+            },
+            content_dev: {
+                options: {
+                    optimize: 'none',
+                    out: 'extension/build/js/content.dev.js',
+                    name: 'ContentMain',
+                    onModuleBundleComplete: function (data) {
+                        var fs = require('fs'),
+                            amdclean = require('amdclean'),
+                            outputFile = data.path;
+
+                        fs.writeFileSync(outputFile, amdclean.clean({
+                            'filePath': outputFile
+                        }));
+                    }
+                }
             }
         },
+        /* disabled */
         'closure-compiler': {
 			content_release: {
 				js: [
-					'extension/src/js/content/content.js'
+					'extension/build/js/content.dev.js'
 				],
 				jsOutputFile: 'extension/build/js/content.cc.min.js',
 				closurePath: 'grunt/ClosureCompiler',
