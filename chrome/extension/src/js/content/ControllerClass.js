@@ -67,10 +67,18 @@ define([
             var me;
             me = this;
             chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
-                var text = msg['text'];
-                if (!text || text !== "tsGetDetails") { return; }
-                var data = me.collectTicketData();
-                sendResponse(data);
+                var data;
+                var method = msg['method'];
+                switch(method){
+                    case 'tsGetDetails':
+                        data = me.collectTicketData();
+                        sendResponse(data);
+                        break;
+                    case 'tsBringTicketString':
+                        me.onGetTicketString(msg);
+                        break;
+                }
+
             });
             this.mainButtons.forEach(function(btnDef){
                 if (typeof btnDef.listener === 'function'){
@@ -249,6 +257,14 @@ define([
 
         this.id = function(baseId){
             return 'ts-ext-' + baseId + '-' + Math.floor((Math.random() * 10e13));
+        };
+
+        /**
+         * Fires when background generates ticket string by request from this tab
+         * @returns {undefined}
+         */
+        this.onGetTicketString = function(data){debugger;
+            Debug.log(data);
         };
 
         return this.init();

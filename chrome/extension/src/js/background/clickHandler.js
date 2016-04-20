@@ -10,7 +10,7 @@ define(['background/record'], function (record) {
     );
 
     function onItemClick(info, tab) {
-        chrome.tabs.sendMessage(tab.id, {text: "tsGetDetails"}, onGetDetails.bind(this, info));
+        chrome.tabs.sendMessage(tab.id, {method: "tsGetDetails"}, onGetDetails.bind(this, info));
     }
 
     function onGetDetails(info, details) {

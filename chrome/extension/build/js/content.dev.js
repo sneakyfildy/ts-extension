@@ -74,12 +74,17 @@ content_ControllerClass = function () {
       var me;
       me = this;
       chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-        var text = msg['text'];
-        if (!text || text !== 'tsGetDetails') {
-          return;
+        var data;
+        var method = msg['method'];
+        switch (method) {
+        case 'tsGetDetails':
+          data = me.collectTicketData();
+          sendResponse(data);
+          break;
+        case 'tsBringTicketString':
+          me.onGetTicketString(msg);
+          break;
         }
-        var data = me.collectTicketData();
-        sendResponse(data);
       });
       this.mainButtons.forEach(function (btnDef) {
         if (typeof btnDef.listener === 'function') {
@@ -236,6 +241,14 @@ content_ControllerClass = function () {
     }
     this.id = function (baseId) {
       return 'ts-ext-' + baseId + '-' + Math.floor(Math.random() * 100000000000000);
+    };
+    /**
+     * Fires when background generates ticket string by request from this tab
+     * @returns {undefined}
+     */
+    this.onGetTicketString = function (data) {
+      debugger;
+      Debug.log(data);
     };
     return this.init();
   }
