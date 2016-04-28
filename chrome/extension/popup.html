@@ -43,13 +43,17 @@
                     </div>
                 </div>
             </div>
-            <div class="content-line">                
+            <div class="content-line" ng-class="{loading: !!workedTime.loading}">                
                 <div class="line-right">
-                    <div class="worked-time">{{workedTime.str}}</div>
+                    <div class="contents">{{workedTime.str}}</div>
+                    <img class="loading-icon" src="img/bs_loading.gif"/>
                 </div>
                 
                 <div class="line-left">
-                    <div class="btn btn-default update-wt" ng-click="updateWorkedBtn.onClick()" title="Update worked time">
+                    <div class="btn btn-default update-wt" 
+                         ng-click="updateWorkedBtn.onClick()" 
+                         ng-class="{disabled: !!workedTime.loading}" t
+                         itle="Update worked time">
                         {{updateWorkedBtn.caption}}
                     </div>
                 </div>

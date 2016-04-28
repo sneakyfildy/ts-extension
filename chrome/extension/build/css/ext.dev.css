@@ -75,6 +75,10 @@ body.ts-ext {
 .not-important-forever {
   color: #aaa;
 }
+.loading-icon {
+  width: 30px;
+  height: 30px;
+}
 /* hides angular not ready cloaked stuff in CSP mode */
 [ng\:cloak],
 [ng-cloak],
@@ -115,9 +119,21 @@ body.ts-ext-popup .ts-popup-content .content-line .line-left {
 body.ts-ext-popup .ts-popup-content .content-line .line-right {
   float: right;
 }
+body.ts-ext-popup .ts-popup-content .content-line .loading-icon {
+  display: none;
+}
+body.ts-ext-popup .ts-popup-content .content-line.loading .contents {
+  display: none;
+}
+body.ts-ext-popup .ts-popup-content .content-line.loading .loading-icon {
+  display: initial;
+}
 body.ts-ext-popup .ts-popup-content .ticket {
   line-height: 1.5em;
   padding: 2px 5px;
+}
+body.ts-ext-popup .ts-popup-content .contents {
+  display: initial;
 }
 body.ts-ext-popup .header,
 body.ts-ext-popup .username {

@@ -38,11 +38,29 @@ body.ts-ext-popup{
             .line-right{
                 float: right;
             }
+            
+            .loading-icon{
+                display: none;                
+            }
+
+            &.loading{
+                .contents{
+                    display: none;                
+                }
+                .loading-icon{
+                    display: initial;                
+                }
+            }
+            
         }
         .ticket{
             line-height: 1.5em;
             padding: 2px 5px;
         }
+        
+        .contents{
+            display: initial;                
+        }        
     }
     .header, .username{
         height: @header-height;

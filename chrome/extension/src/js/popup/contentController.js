@@ -144,6 +144,9 @@ define([
         };
 
         this.updateWorkedTime = function(){
+            if (this.s.workedTime && !!this.s.workedTime.loading){
+                return;
+            }
             // just kindly ask CE Bg to get worked time data
             chrome.runtime.sendMessage(
                 new ExtensionMessage({

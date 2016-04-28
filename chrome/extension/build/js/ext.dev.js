@@ -767,6 +767,10 @@ define('background/popupController',[
     };
 
     PopupController.prototype.getWorkedTime = function (request, sender, sendResponse) {
+        this.worked = {
+            loading: true
+        };
+        state.setParam('workedTime', this.worked);
         User.update(
             this._sendWorkedTimeRequest.bind(this, sender.tab && sender.tab.id || sender.id)
         );
