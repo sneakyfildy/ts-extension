@@ -44,23 +44,24 @@ body.ts-ext-popup{
             padding: 2px 5px;
         }
     }
-    
-    .header{
+    .header, .username{
         height: @header-height;
         line-height: @header-height;
         font-size: 0.8em;
         border-bottom: 1px solid #eee;
+        padding: 0 0 0 4px;
+    }
+    .header{
         
         .status{
-            float: left;
-            padding: 0 0 0 4px;
+            float: left;       
             
             .started{
                 &.green{
-                    color: #0B9300;
+                    color: @good-color;
                 }
                 &.red{
-                    color: #BF0B00;
+                    color: @error-color;
                 }
             }
         }
@@ -75,6 +76,16 @@ body.ts-ext-popup{
             }
         }
 
+    }
+    
+    .username{
+        .name-text{
+            color: @good-color;
+            
+            &.error{
+                color: @error-color;
+            }            
+        }
     }
         
 }

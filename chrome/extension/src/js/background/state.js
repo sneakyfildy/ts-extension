@@ -2,8 +2,10 @@
 
 define([
     'background/msgRouter',
-    'background/localStorage'
-], function (msgRouter, ls) {
+    'background/localStorage',
+    'common/ExtMsgConstructor',
+    'common/ActionsList'
+], function (msgRouter, ls, ExtensionMessage, ActionsList) {
     // handles clicks on 'start' popup button (it may change its caption)
     function State() {
 
@@ -11,12 +13,13 @@ define([
     // d is for data
     State.prototype.d = {
         started: false,
-        tickets: []
+        tickets: [],
+        username: ''
     };
 
     State.prototype.init = function () {
         if (!this.__init) {
-            msgRouter.addListener('getState', this.onMsgGetState.bind(this));
+            msgRouter.addListener(ActionsList.state.need, this.onMsgGetState.bind(this));
             this.restoreState();
             this.__init = true;
         }
@@ -79,7 +82,6 @@ define([
         this.d.tickets.push(ticket);
 
         this.setState();
-        this.broadcastUpdateState();
 
         var n = new Notification('Ticket started', {
             icon: 'img/icon48.png',
@@ -108,16 +110,19 @@ define([
         var d = this.d;
         opts = opts || opts;
         this.d.opts = opts;
-        
-        this.setState();
-        this.broadcastUpdateState();
 
+        this.setState();
         return this.getState();
     };
 
     State.prototype.broadcastUpdateState = function () {
         chrome.runtime.sendMessage(
-            {action: 'ts_ext_updateState', state: this.d}
+            new ExtensionMessage({
+                action: ActionsList.state.got,
+                data: {
+                    state: this.d
+                }
+            })
         );
     };
 
@@ -128,11 +133,21 @@ define([
         }
     };
 
-    State.prototype.setState = function () {
-        ls.setItem('state', this.d);
+    State.prototype.setParam = function(name, value) {
+        this.d[name] = value;
+        this.setState();
     };
 
-    State.prototype.getState = function () {
+    State.prototype.getParam = function(name) {
+        return this.getState()[name];
+    };
+
+    State.prototype.setState = function() {
+        ls.setItem('state', this.d);
+        this.broadcastUpdateState();
+    };
+
+    State.prototype.getState = function() {
         return ls.getItem('state') || {};
     };
 

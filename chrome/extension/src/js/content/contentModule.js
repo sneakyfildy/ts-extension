@@ -1,9 +1,9 @@
 define([
-    'common/DebugClass',
-    'content/ControllerClass',
+    'common/DebugLoggerConstructor',
+    'content/ContentScriptController',
     'content/Detector'
-], function(DebugClass, ContentController, Detector){
-    var Debug = new DebugClass();
+], function(DebugLoggerConstructor, ContentController, Detector){
+    var Debug = new DebugLoggerConstructor();
     Debug.on();
 
     var Content = new ContentController({

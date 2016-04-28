@@ -12,16 +12,20 @@
     <body class="ts-ext-popup ts-ext" ng-csp ng-cloak ng-controller="contentController">
         <div class="header">
            <div class="status">
-               WD is <span class="started bold" ng-class="started ? 'green' : 'red'">{{started ? '' : 'not'}} started</span>
+               WD : <span class="started bold" ng-class="started ? 'green' : 'red'">{{started ? '' : 'not'}} started</span>
             </div>
             <div class="current-time">
                 {{headerDateString}}&nbsp;
                 {{currentHours}}<span class="flickering">:</span>{{currentMins}}
                 <span class="not-important-forever italic"> (UTC{{timezoneHuman}})</span>
-            </div>
+            </div>            
+        </div>
+        <div class="username">
+            User: <span class="name-text bold" 
+                        ng-class="{error: !!usernameError}">{{username || usernameError}}</span>
         </div>
         <div class="ts-popup-content"> 
-            <div class="content-line">                
+            <div class="content-line">
                 <div class="line-right">
                     <div class="start time" ng-class="started ? 'dblock' : 'dnone'">
                         Last WD start: <span class="bold">{{wdStartTimeHuman}}</span>                        
@@ -34,8 +38,19 @@
                 </div>
                 
                 <div class="line-left">
-                    <div class="btn btn-default start-day" ng-click="startBtn.onClick($event)" title="Start/end working day">
+                    <div class="btn btn-default start-day" ng-click="startBtn.onClick()" title="Start/end working day">
                         {{startBtn.caption}} WD
+                    </div>
+                </div>
+            </div>
+            <div class="content-line">                
+                <div class="line-right">
+                    <div class="worked-time">{{workedTime.str}}</div>
+                </div>
+                
+                <div class="line-left">
+                    <div class="btn btn-default update-wt" ng-click="updateWorkedBtn.onClick()" title="Update worked time">
+                        {{updateWorkedBtn.caption}}
                     </div>
                 </div>
             </div>

@@ -1,9 +1,10 @@
 /* global chrome */
 
 define([
-
-], function(){
-    function ControllerClass(setup){
+    'common/ActionsList',
+    'common/ExtMsgConstructor'
+], function(ActionsList, ExtensionMessage){
+    function ContentScriptController(setup){
         setup = setup || {};
         var Debug = setup.Debug;
         var d = window.document;
@@ -68,14 +69,13 @@ define([
             me = this;
             chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
                 var data;
-                var method = msg['method'];
-                switch(method){
-                    case 'tsGetDetails':
+                switch(msg['action']){
+                    case ActionsList.content.contextMenuClick:
                         data = me.collectTicketData();
                         sendResponse(data);
                         break;
-                    case 'tsBringTicketString':
-                        me.onGetTicketString(msg);
+                    case ActionsList.content.gotTicketString:
+                        me.onGetTicketString(msg.data);
                         break;
                 }
 
@@ -92,19 +92,22 @@ define([
         };
 
         this.onExportButtonClick = function(){
-            var data = this.collectTicketData() || {};
-            data.action = 'ts_ext_ticketDetails';
-            chrome.runtime.sendMessage(data, function(recordString) {
-                Debug.log(recordString);
-            });
+            chrome.runtime.sendMessage(new ExtensionMessage({
+                action: ActionsList.content.clipboardClick,
+                data: this.collectTicketData() || {}
+            }));
         };
 
         this.onStartButtonClick = function(){
-            var data = this.collectTicketData() || {};
-            data.action = 'ts_ext_startTicket';
-            chrome.runtime.sendMessage(data, function(answer) {
-                Debug.log(answer);
-            });
+            chrome.runtime.sendMessage(
+                new ExtensionMessage({
+                    action: ActionsList.content.startTicketClick,
+                    data: this.collectTicketData() || {}
+                }),
+                function(answer) {
+                    Debug.log(answer);
+                }
+            );
         };
 
         /* refactor, split, make explicit */
@@ -261,14 +264,15 @@ define([
 
         /**
          * Fires when background generates ticket string by request from this tab
+         * @param {String} ticketString Ready timesheet record
          * @returns {undefined}
          */
-        this.onGetTicketString = function(data){debugger;
-            Debug.log(data);
+        this.onGetTicketString = function(ticketString){
+            Debug.log(ticketString);
         };
 
         return this.init();
     }
 
-    return ControllerClass;
+    return ContentScriptController;
 });

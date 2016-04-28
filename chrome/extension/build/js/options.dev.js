@@ -104,11 +104,62 @@ define('common/dates',[
 });
 
 
+define('common/ExtMsgConstructor',[
+], function(){
+    function ExtMsgConstructor(config){
+        if (typeof config.action === 'undefined' || typeof config.data === 'undefined'){
+            throw 'Action and data properties are required';
+        }
+
+        this.action = config.action;
+        this.data = config.data;
+
+        if (this.action.indexOf(this.actionPrefix) < 0){
+            this.action = this.addPrefix(this.action);
+        }
+    }
+    ExtMsgConstructor.prototype.actionPrefix = 'ts_ext_';
+    ExtMsgConstructor.prototype.addPrefix = function(sourceStr){
+        var readyAction = sourceStr.indexOf(this.actionPrefix) < 0 ? (this.actionPrefix + sourceStr) : sourceStr;
+        return readyAction;
+    };
+
+    return ExtMsgConstructor;
+});
+define('common/ActionsList',[
+    'common/ExtMsgConstructor'
+], function(msg){
+    var transform = msg.prototype.addPrefix.bind(msg.prototype);
+    var ActionsList = {
+        popup: {
+            startClick: transform('popupStartButton'),
+            needState: transform('popupNeedState'),
+            gotState: transform('popupGotState')
+        },
+        content: {
+            clipboardClick: transform('getTicketData'),
+            contextMenuClick: transform('getTicketDataByContextMenu'),
+            startTicketClick: transform('startTicketClick'),
+            gotTicketString: transform('hereIsTheTicketString')
+        },
+        state: {
+            need: transform('generalNeedState'),
+            got: transform('generalGotState')
+        },
+        workedTime: {
+            needUpdate: transform('pleaseUpdateWorkedTime')
+        }
+    };
+
+    return ActionsList;
+});
 /* global chrome */
 
 define('options/optionsController',[
-    'common/dates'
-], function (dates) {
+    'common/dates',
+    'common/ActionsList',
+    'common/ExtMsgConstructor'
+], function (dates, ActionsList, ExtensionMessage) {
     function OptionsController(){
         this.onGetState = function(state){
             this.applyState(state);
@@ -179,7 +230,10 @@ define('options/optionsController',[
 
         this.getState = function(){
             chrome.runtime.sendMessage(
-                {action: 'ts_ext_getState'},
+                new ExtensionMessage({
+                    action: ActionsList.state.need,
+                    data: ''
+                }),
                 this.onGetState.bind(this)
             );
         };
@@ -196,8 +250,8 @@ define('options/optionsController',[
 
         this.onMessage = function(request){
             switch(request.action){
-                case 'ts_ext_updateState':
-                    this.onGetState(request.state);
+                case ActionsList.state.got:
+                    this.onGetState(request.data.state);
                     break;
             }
         };

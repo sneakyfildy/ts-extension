@@ -1,7 +1,7 @@
 define([
 ], function(){
     function ExtMsgConstructor(config){
-        if (!config.action || !config.data){
+        if (typeof config.action === 'undefined' || typeof config.data === 'undefined'){
             throw 'Action and data properties are required';
         }
 
@@ -14,10 +14,7 @@ define([
     }
     ExtMsgConstructor.prototype.actionPrefix = 'ts_ext_';
     ExtMsgConstructor.prototype.addPrefix = function(sourceStr){
-        var readyAction = sourceStr;
-        if (sourceStr.indexOf(this.actionPrefix) < 0){
-            readyAction = this.actionPrefix + sourceStr;
-        }
+        var readyAction = sourceStr.indexOf(this.actionPrefix) < 0 ? (this.actionPrefix + sourceStr) : sourceStr;
         return readyAction;
     };
 

@@ -56,7 +56,7 @@
              * Custom AJAX function, implement it yourself if wanna be jquery-independent
              */
             nonJqueryAjax: null,
-            onGetTicket: function (callback, res) {debugger;
+            onGetTicket: function (callback, res) {
                 var parsedRes = this.parseResponse(res);
 
                 if (!parsedRes.success){

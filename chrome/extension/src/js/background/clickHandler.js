@@ -1,6 +1,10 @@
 /* global chrome */
 
-define(['background/record'], function (record) {
+define([
+    'background/record',
+    'common/ExtMsgConstructor',
+    'common/ActionsList'
+], function (record, ExtensionMessage, ActionsList) {
     chrome.contextMenus.create(
         {
             title: 'Form TS rec and ctrl+C',
@@ -9,8 +13,16 @@ define(['background/record'], function (record) {
         }
     );
 
+    // context menu click handler
     function onItemClick(info, tab) {
-        chrome.tabs.sendMessage(tab.id, {method: "tsGetDetails"}, onGetDetails.bind(this, info));
+        chrome.tabs.sendMessage(
+            tab.id,
+            new ExtensionMessage({
+                action: ActionsList.content.contextMenuClick,
+                data: ''
+            }),
+            onGetDetails.bind(this, info)
+        );
     }
 
     function onGetDetails(info, details) {

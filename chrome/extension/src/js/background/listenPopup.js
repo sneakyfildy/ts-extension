@@ -2,8 +2,16 @@
 
 define([
     'background/msgRouter',
-    'background/popupStartController'
-], function(msgRouter, popupStartController){
-    msgRouter.addListener('popupStartButton', popupStartController.onClick.bind(popupStartController));
+    'background/popupController',
+    'common/ActionsList'
+], function(msgRouter, popupController, ActionsList){
+    msgRouter.addListener(
+        ActionsList.popup.startClick,
+        popupController.onStartClick.bind(popupController)
+    );
+    msgRouter.addListener(
+        ActionsList.workedTime.needUpdate,
+        popupController.getWorkedTime.bind(popupController)
+    );
 });
 

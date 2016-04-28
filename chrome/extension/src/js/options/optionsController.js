@@ -1,8 +1,10 @@
 /* global chrome */
 
 define([
-    'common/dates'
-], function (dates) {
+    'common/dates',
+    'common/ActionsList',
+    'common/ExtMsgConstructor'
+], function (dates, ActionsList, ExtensionMessage) {
     function OptionsController(){
         this.onGetState = function(state){
             this.applyState(state);
@@ -73,7 +75,10 @@ define([
 
         this.getState = function(){
             chrome.runtime.sendMessage(
-                {action: 'ts_ext_getState'},
+                new ExtensionMessage({
+                    action: ActionsList.state.need,
+                    data: ''
+                }),
                 this.onGetState.bind(this)
             );
         };
@@ -90,8 +95,8 @@ define([
 
         this.onMessage = function(request){
             switch(request.action){
-                case 'ts_ext_updateState':
-                    this.onGetState(request.state);
+                case ActionsList.state.got:
+                    this.onGetState(request.data.state);
                     break;
             }
         };

@@ -3,7 +3,6 @@
 define([
 ], function(){
     function MessageRouter(){
-        this.actionPrefix = 'ts_ext_';
         chrome.runtime.onMessage.addListener(this.messageListener.bind(this));
 
         this.add = function(a,b){
@@ -29,7 +28,7 @@ define([
                 this.map[action](request, sender, sendResponse); // provide already bound functions if needed
             }
         }catch(err){
-            console.warn('Message processing has failed. Let the developer know about that.');
+            console.warn('Message processing has failed. Let the developer know about that.' + err);
         }
     };
 
@@ -41,7 +40,7 @@ define([
      * @returns {undefined}
      */
     MessageRouter.prototype.addListener = function (action, callback) {
-        this.map[this.actionPrefix + action] = callback; // one action - one callback
+        this.map[action] = callback; // one action - one callback
     };
 
     return new MessageRouter();

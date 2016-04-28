@@ -1,7 +1,7 @@
 ;(function() {
-var common_DebugClass, content_ControllerClass, content_Detector, content_contentModule, ContentMain;
-common_DebugClass = function () {
-  function DebugClass() {
+var common_DebugLoggerConstructor, common_ExtMsgConstructor, common_ActionsList, content_ContentScriptController, content_Detector, content_contentModule, ContentMain;
+common_DebugLoggerConstructor = function () {
+  function DebugLoggerConstructor() {
     this.enabled = false;
     this.on = function () {
       this.enabled = true;
@@ -15,10 +15,50 @@ common_DebugClass = function () {
       }
     };
   }
-  return DebugClass;
+  return DebugLoggerConstructor;
 }();
-content_ControllerClass = function () {
-  function ControllerClass(setup) {
+common_ExtMsgConstructor = function () {
+  function ExtMsgConstructor(config) {
+    if (typeof config.action === 'undefined' || typeof config.data === 'undefined') {
+      throw 'Action and data properties are required';
+    }
+    this.action = config.action;
+    this.data = config.data;
+    if (this.action.indexOf(this.actionPrefix) < 0) {
+      this.action = this.addPrefix(this.action);
+    }
+  }
+  ExtMsgConstructor.prototype.actionPrefix = 'ts_ext_';
+  ExtMsgConstructor.prototype.addPrefix = function (sourceStr) {
+    var readyAction = sourceStr.indexOf(this.actionPrefix) < 0 ? this.actionPrefix + sourceStr : sourceStr;
+    return readyAction;
+  };
+  return ExtMsgConstructor;
+}();
+common_ActionsList = function (msg) {
+  var transform = msg.prototype.addPrefix.bind(msg.prototype);
+  var ActionsList = {
+    popup: {
+      startClick: transform('popupStartButton'),
+      needState: transform('popupNeedState'),
+      gotState: transform('popupGotState')
+    },
+    content: {
+      clipboardClick: transform('getTicketData'),
+      contextMenuClick: transform('getTicketDataByContextMenu'),
+      startTicketClick: transform('startTicketClick'),
+      gotTicketString: transform('hereIsTheTicketString')
+    },
+    state: {
+      need: transform('generalNeedState'),
+      got: transform('generalGotState')
+    },
+    workedTime: { needUpdate: transform('pleaseUpdateWorkedTime') }
+  };
+  return ActionsList;
+}(common_ExtMsgConstructor);
+content_ContentScriptController = function (ActionsList, ExtensionMessage) {
+  function ContentScriptController(setup) {
     setup = setup || {};
     var Debug = setup.Debug;
     var d = window.document;
@@ -75,14 +115,13 @@ content_ControllerClass = function () {
       me = this;
       chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         var data;
-        var method = msg['method'];
-        switch (method) {
-        case 'tsGetDetails':
+        switch (msg['action']) {
+        case ActionsList.content.contextMenuClick:
           data = me.collectTicketData();
           sendResponse(data);
           break;
-        case 'tsBringTicketString':
-          me.onGetTicketString(msg);
+        case ActionsList.content.gotTicketString:
+          me.onGetTicketString(msg.data);
           break;
         }
       });
@@ -94,16 +133,16 @@ content_ControllerClass = function () {
       });
     };
     this.onExportButtonClick = function () {
-      var data = this.collectTicketData() || {};
-      data.action = 'ts_ext_ticketDetails';
-      chrome.runtime.sendMessage(data, function (recordString) {
-        Debug.log(recordString);
-      });
+      chrome.runtime.sendMessage(new ExtensionMessage({
+        action: ActionsList.content.clipboardClick,
+        data: this.collectTicketData() || {}
+      }));
     };
     this.onStartButtonClick = function () {
-      var data = this.collectTicketData() || {};
-      data.action = 'ts_ext_startTicket';
-      chrome.runtime.sendMessage(data, function (answer) {
+      chrome.runtime.sendMessage(new ExtensionMessage({
+        action: ActionsList.content.startTicketClick,
+        data: this.collectTicketData() || {}
+      }), function (answer) {
         Debug.log(answer);
       });
     };
@@ -244,16 +283,16 @@ content_ControllerClass = function () {
     };
     /**
      * Fires when background generates ticket string by request from this tab
+     * @param {String} ticketString Ready timesheet record
      * @returns {undefined}
      */
-    this.onGetTicketString = function (data) {
-      debugger;
-      Debug.log(data);
+    this.onGetTicketString = function (ticketString) {
+      Debug.log(ticketString);
     };
     return this.init();
   }
-  return ControllerClass;
-}();
+  return ContentScriptController;
+}(common_ActionsList, common_ExtMsgConstructor);
 content_Detector = function () {
   function DetectorClass() {
     /**
@@ -287,8 +326,8 @@ content_Detector = function () {
   }
   return new DetectorClass();
 }();
-content_contentModule = function (DebugClass, ContentController, Detector) {
-  var Debug = new DebugClass();
+content_contentModule = function (DebugLoggerConstructor, ContentController, Detector) {
+  var Debug = new DebugLoggerConstructor();
   Debug.on();
   var Content = new ContentController({ Debug: Debug });
   var d, displayPageCfg, modifyPageCfg, buttonCls;
@@ -351,6 +390,6 @@ content_contentModule = function (DebugClass, ContentController, Detector) {
     header.insertBefore(container, header.firstChild);
     return container;
   }
-}(common_DebugClass, content_ControllerClass, content_Detector);
+}(common_DebugLoggerConstructor, content_ContentScriptController, content_Detector);
 ContentMain = undefined;
 }());

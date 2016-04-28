@@ -33,6 +33,7 @@
         "notifications",
         "tabs",
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "https://www.iponweb.net/twiki/*"
     ]
 }

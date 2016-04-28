@@ -1,5 +1,5 @@
 define([], function(){
-    function DebugClass(){
+    function DebugLoggerConstructor(){
         this.enabled = false;
         this.on = function(){
             this.enabled = true;
@@ -13,6 +13,6 @@ define([], function(){
             }
         };
     }
-    
-    return DebugClass;
+
+    return DebugLoggerConstructor;
 });

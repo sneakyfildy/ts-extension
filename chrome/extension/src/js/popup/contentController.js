@@ -1,19 +1,29 @@
 /* global chrome */
 
 define([
-    'common/dates'
-], function (dates) {
+    'common/dates',
+    'common/ActionsList',
+    'common/ExtMsgConstructor'
+], function (dates, ActionsList, ExtensionMessage) {
     function ContentController(){
         this.onGetState = function(state){
             this.applyState(state);
         };
 
         this.onStartBtnClick = function () {
-            console.log(new Date());
             chrome.runtime.sendMessage(
-                {action: 'ts_ext_popupStartButton', button: this.$scope.startBtn},
+                new ExtensionMessage({
+                    action: ActionsList.popup.startClick,
+                    data: {
+                        button: this.$scope.startBtn
+                    }
+                }),
                 this.onStartBtnResponse.bind(this)
             );
+        };
+
+        this.onUpdateWorkedTimeClick = function(){
+            this.updateWorkedTime();
         };
 
         this.onStartBtnResponse = function(state){
@@ -30,10 +40,9 @@ define([
          * @returns {undefined}
          */
         this.applyState = function(state){
-            this.$scope.started = state.started;
-            this.$scope.startTime = state.startTime;
-            this.$scope.endTime = state.endTime;
-            this.$scope.tickets = state.tickets;
+            for (var i in state){
+                this.$scope[i] = state[i];
+            }
             this.$scope.opts = state.opts || {};
 
             this.commitState();
@@ -83,7 +92,10 @@ define([
 
         this.getState = function(){
             chrome.runtime.sendMessage(
-                {action: 'ts_ext_getState'},
+                new ExtensionMessage({
+                    action: ActionsList.state.need,
+                    data: ''
+                }),
                 this.onGetState.bind(this)
             );
         };
@@ -101,9 +113,9 @@ define([
             this.s.currentHours = dates.xx( date.getHours() );
             this.s.currentMins = dates.xx( date.getMinutes() );
 
-            var dayNameFull = dates.getDayName(date);
+            var dayNameShort = dates.getDayName(date, {short: true});
             var monthNameShort = dates.getMonthName(date, {short: true});
-            this.s.headerDateString = dayNameFull + ' ' + monthNameShort + ' ' + dates.xx(date.getDate());
+            this.s.headerDateString = dayNameShort + ' ' + monthNameShort + ' ' + dates.xx(date.getDate());
             if ( prevMins !== this.s.currentMins || prevHours !== this.s.currentHours  ){
                 this.$timeout(this.s.$apply.bind(this.$scope));
             }
@@ -125,10 +137,20 @@ define([
 
         this.onMessage = function(request){
             switch(request.action){
-                case 'ts_ext_updateState':
-                    this.onGetState(request.state);
+                case ActionsList.state.got:
+                    this.onGetState(request.data.state);
                     break;
             }
+        };
+
+        this.updateWorkedTime = function(){
+            // just kindly ask CE Bg to get worked time data
+            chrome.runtime.sendMessage(
+                new ExtensionMessage({
+                    action: ActionsList.workedTime.needUpdate,
+                    data: ''
+                })
+            );
         };
 
         this.onLinkClick = function(e){
@@ -139,6 +161,7 @@ define([
             e.stopPropagation();
             return false;
         };
+
         this.goToLink = function goToLink(link){
             chrome.tabs.create({
                 url:link
@@ -146,10 +169,11 @@ define([
         };
     }
 
-    ContentController.prototype.controllerConstructor = function($scope, $timeout){
+    ContentController.prototype.controllerConstructor = function($scope, $timeout, $http){
         var my = $scope;
         this.$scope = this.scope = this.s = $scope;
         this.$timeout = $timeout;
+        this.$http = $http;
         this.getState();
         this.calculateTimezone();
         this.startUpdateCurrentTime();
@@ -159,6 +183,11 @@ define([
         my.startBtn = {
             caption: 'Start',
             onClick: this.onStartBtnClick.bind(this)
+        };
+
+        my.updateWorkedBtn = {
+            caption: 'Update Hours',
+            onClick: this.onUpdateWorkedTimeClick.bind(this)
         };
     };
 
