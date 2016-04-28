@@ -8,13 +8,14 @@ require([
     'background/listenContent',
     'background/listenPopup',
     'background/listenOptions'
-], function(User){
+], function(User, clickHandler, listenContent, listenPopup, listenOptions){
     var bg = new BackGround();
-    User.update(bg.logName.bind(bg));
+    User.update(bg.onGotName.bind(bg));
 
     function BackGround(){
-        this.logName = function(a){
+        this.onGotName = function(a){
             console.log( 'User name: ', User.getName() || User.getLastNameError());
+            listenPopup.popupController.getWorkedTime();
         };
     }
 });

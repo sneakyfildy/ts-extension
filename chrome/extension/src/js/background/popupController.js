@@ -13,28 +13,36 @@ define([
         state.toggleDayStart();
         sendResponse(state.d);
     };
-
-    PopupController.prototype.getWorkedTime = function (request, sender, sendResponse) {
+    PopupController.prototype.getWorkedTime = function () {
         this.worked = {
             loading: true
         };
         state.setParam('workedTime', this.worked);
+        chrome.browserAction.setBadgeText({
+            text: '...'
+        });
+        chrome.browserAction.setTitle({
+            title: 'Updating...'
+        });
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: '#666666'
+        });
         User.update(
-            this._sendWorkedTimeRequest.bind(this, sender.tab && sender.tab.id || sender.id)
+            this._sendWorkedTimeRequest.bind(this)
         );
     };
 
-    PopupController.prototype._sendWorkedTimeRequest = function (userName, senderTabId) {
+    PopupController.prototype._sendWorkedTimeRequest = function (userName) {
         var request = $.ajax({
             method: 'GET',
             url: 'https://www.iponweb.net/twiki/bin/view/IPonweb/TimesheetApril2016',
             timeout: 10000,
-            success: this._onGetWorkedTime.bind(this, senderTabId, userName),
+            success: this._onGetWorkedTime.bind(this, userName),
             error: this._onFailedGetWorkedTime.bind(this)
         });
     };
 
-    PopupController.prototype._onGetWorkedTime = function (userName, senderTabId, res) {
+    PopupController.prototype._onGetWorkedTime = function (userName, res) {
         if (!res) {
             console.error('Empty worked time response');
         }
@@ -80,12 +88,6 @@ define([
             color: color
         });
         state.setParam('workedTime', this.worked);
-//        chrome.runtime.sendMessage(
-//            {
-//                action: 'ts_ext_Ololololo',
-//                data: this.worked
-//            }
-//        );
     };
 
     PopupController.prototype._onFailedGetWorkedTime = function (res) {

@@ -13,5 +13,9 @@ define([
         ActionsList.workedTime.needUpdate,
         popupController.getWorkedTime.bind(popupController)
     );
+
+    return {
+        popupController: popupController
+    };
 });
 
