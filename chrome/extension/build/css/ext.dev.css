@@ -104,14 +104,14 @@ body.ts-ext-popup {
   min-height: 70px;
 }
 body.ts-ext-popup .ts-popup-content {
-  padding: 5px;
+  padding: 0 2px;
 }
 body.ts-ext-popup .ts-popup-content .content-line {
   width: 100%;
   overflow: hidden;
   line-height: 40px;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 4px;
+  padding: 0 0 2px 0;
 }
 body.ts-ext-popup .ts-popup-content .content-line .line-left {
   float: left;
@@ -127,6 +127,9 @@ body.ts-ext-popup .ts-popup-content .content-line.loading .contents {
 }
 body.ts-ext-popup .ts-popup-content .content-line.loading .loading-icon {
   display: initial;
+}
+body.ts-ext-popup .ts-popup-content .content-line:last-child {
+  border-bottom: none;
 }
 body.ts-ext-popup .ts-popup-content .ticket {
   line-height: 1.5em;

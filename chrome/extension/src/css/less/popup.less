@@ -23,14 +23,14 @@ body.ts-ext-popup{
     }
 
     .ts-popup-content{
-        padding: 5px;
+        padding: 0 2px;
 
         .content-line{
             width: 100%;
             overflow: hidden;
             line-height: @content-line-height;
             border-bottom: 1px solid #ddd;
-            padding-bottom: 4px;
+            padding: 0 0 2px 0;
             
             .line-left{        
                 float: left;
@@ -50,6 +50,10 @@ body.ts-ext-popup{
                 .loading-icon{
                     display: initial;                
                 }
+            }
+            
+            &:last-child{
+                border-bottom: none;
             }
             
         }
