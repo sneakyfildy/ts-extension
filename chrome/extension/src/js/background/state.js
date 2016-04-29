@@ -4,8 +4,9 @@ define([
     'background/msgRouter',
     'background/localStorage',
     'common/ExtMsgConstructor',
-    'common/ActionsList'
-], function (msgRouter, ls, ExtensionMessage, ActionsList) {
+    'common/ActionsList',
+    'common/NotifModule'
+], function (msgRouter, ls, ExtensionMessage, ActionsList, Notif) {
     // handles clicks on 'start' popup button (it may change its caption)
     function State() {
 
@@ -46,13 +47,14 @@ define([
         this.setState();
     };
 
-    State.prototype.startTicket = function (contentPageData) {
-        if (!this.validateTicketData(contentPageData)) {
+    State.prototype.startTicket = function (ticketData) {
+        // {id, queue, subject} - ticketData
+        if (!this.validateTicketData(ticketData)) {
             return;
         }
         this.d.tickets = this.d.tickets || [];
         var ticket, t;
-        t = contentPageData;
+        t = ticketData;
 
 
         // we'll start with having only one active ticket
@@ -82,12 +84,11 @@ define([
         this.d.tickets.push(ticket);
 
         this.setState();
-
-        var n = new Notification('Ticket started', {
-            icon: 'img/icon48.png',
-            body: ticket.id + ': ' + ticket.subject
+        Notif.show({
+            title: 'Ticket started',
+            body: ticket.id + ': ' + ticket.subject,
+            autoClose: true
         });
-        setTimeout(n.close.bind(n), 3000);
         return ticket;
     };
 

@@ -134,14 +134,57 @@ define('common/ActionsList',[
 
     return ActionsList;
 });
+define('common/NotifModule',[
+], function(){
+    /**
+     * @class NotifModule
+     * @param {Object} config
+     */
+    function NotifModule(config){
+        config = config || {};
+        /**
+         * @cfg {Number} milliseconds to autoclose
+         */
+        this.defaultTimeout = config.timeout || 3000;
+        /**
+         * @cfg {String} path to icon
+         */
+        this.defaultIcon = config.icon || 'img/icon48.png';
+    }
+
+    /**
+     * Shows notif
+     * @param {Object} config
+     * @param {Number} [config.timeout] milliseconds to autoclose,
+     * if undefined - {@link NotifModule#defaultTimeout}
+     * @param {String} [config.title] Message title, default is ''
+     * @param {String} [config.body] Message body, default is ''
+     * @param {Boolean} [config.autoClose] Set to true to auto close notif after given or default timeout
+     * @return {Notification}
+     */
+    NotifModule.prototype.show = function(config){
+        config = config || {};
+        var n = new Notification(config.title || '', {
+            icon: this.defaultIcon,
+            body: config.body || ''
+        });
+        if (config.autoClose){
+            setTimeout(n.close.bind(n), this.defaultTimeout || config.timeout);
+        }
+        return n;
+    };
+
+    return new NotifModule();
+});
 /* global chrome */
 
 define('background/state',[
     'background/msgRouter',
     'background/localStorage',
     'common/ExtMsgConstructor',
-    'common/ActionsList'
-], function (msgRouter, ls, ExtensionMessage, ActionsList) {
+    'common/ActionsList',
+    'common/NotifModule'
+], function (msgRouter, ls, ExtensionMessage, ActionsList, Notif) {
     // handles clicks on 'start' popup button (it may change its caption)
     function State() {
 
@@ -182,13 +225,14 @@ define('background/state',[
         this.setState();
     };
 
-    State.prototype.startTicket = function (contentPageData) {
-        if (!this.validateTicketData(contentPageData)) {
+    State.prototype.startTicket = function (ticketData) {
+        // {id, queue, subject} - ticketData
+        if (!this.validateTicketData(ticketData)) {
             return;
         }
         this.d.tickets = this.d.tickets || [];
         var ticket, t;
-        t = contentPageData;
+        t = ticketData;
 
 
         // we'll start with having only one active ticket
@@ -218,12 +262,11 @@ define('background/state',[
         this.d.tickets.push(ticket);
 
         this.setState();
-
-        var n = new Notification('Ticket started', {
-            icon: 'img/icon48.png',
-            body: ticket.id + ': ' + ticket.subject
+        Notif.show({
+            title: 'Ticket started',
+            body: ticket.id + ': ' + ticket.subject,
+            autoClose: true
         });
-        setTimeout(n.close.bind(n), 3000);
         return ticket;
     };
 
@@ -701,51 +744,62 @@ define('background/listenContent',[
     'common/ExtMsgConstructor',
     'common/ActionsList'
 ], function(record, msgRouter, state, RTConstructor, ExtensionMessage, ActionsList){
-    msgRouter.addListener(ActionsList.content.clipboardClick, makeRecordRemote);
-    msgRouter.addListener(ActionsList.content.startTicketClick, startTicket);
+    msgRouter.addListener(ActionsList.content.clipboardClick, createSomethingByTicketData);
+    msgRouter.addListener(ActionsList.content.startTicketClick, createSomethingByTicketData);
     window.RT = new RTConstructor({
         url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
-    function makeRecord(request, sender, sendResponse){
-        var recordString = record.make.apply(record, arguments);
-        sendResponse(recordString);
-    }
-    /**
-     *
-     * @param {Object} request
-     * @param {String} request.id
-     * @param {String} request.queue
-     * @param {String} request.subject
-     * @param {type} sender
-     * @param {type} sendResponse
-     * @returns {undefined}
-     */
-    function makeRecordRemote(request, sender, sendResponse){
-        var ticketDataFromContent = request.data;
-        if (!ticketDataFromContent || !ticketDataFromContent.id){
-            throw 'Ticket ID is required to get ticket info from RT';
-        }
-        RT.getTicket(ticketDataFromContent.id, makeRemoteAnswer.bind(this, sender.tab.id));
+
+    function makeRecord(ticketData){
+        return record.make.apply(record, [ticketData]);
     }
 
-    function makeRemoteAnswer(senderTabId, getTicketResponse){
-        var recordString;
-        getTicketResponse = getTicketResponse || {};
-        if ( getTicketResponse.success && getTicketResponse.ticketData){
-            recordString = record.make.apply(record, [getTicketResponse.ticketData]);
+    function startTicket(ticketData){
+        return state.startTicket(ticketData);
+    }
+
+    /**
+     * General function, must be bound with sender tab id and keyFunction
+     * it receives ticket data from RT as 3rd argument, calls keyFunction method and
+     * returns result via chome message into the sender tab by its id
+     * @param {Number|String} senderTabId
+     * @param {Function} keyFunction
+     * @param {Object} ticketResponse
+     * @returns {undefined}
+     */
+    function makeAnswer(senderTabId, keyFunction, ticketResponse){
+        var result = {};
+        ticketResponse = ticketResponse || {};
+        if ( ticketResponse.success && ticketResponse.ticketData){
+            try{
+                result = keyFunction(ticketResponse.ticketData);
+            }catch(err){
+                console.error('Error while running keyFunction inside makeAnswer', err);
+            }
             chrome.tabs.sendMessage(
                 senderTabId,
                 new ExtensionMessage({
                     action: ActionsList.content.gotTicketString,
-                    data: recordString
+                    data: result
                 })
             );
         }
     }
 
-    function startTicket(request, sender, sendResponse){
-        var ticket = state.startTicket(request.data);
-        sendResponse(ticket);
+    function createSomethingByTicketData(request, sender){
+        var keyFunction;
+        if (!request.data || !request.data.id){
+            throw 'Ticket ID is required to get ticket info from RT';
+        }
+        switch(request.action){
+            case ActionsList.content.clipboardClick:
+                keyFunction = makeRecord;
+                break;
+            case ActionsList.content.startTicketClick:
+                keyFunction = startTicket;
+                break;
+        }
+        RT.getTicket(request.data.id, makeAnswer.bind(this, sender.tab.id, keyFunction));
     }
 });
 
@@ -843,6 +897,13 @@ define('background/popupController',[
     };
 
     PopupController.prototype._onFailedGetWorkedTime = function (res) {
+        this.worked = {
+            worked: 0,
+            total: 0,
+            rest: 0,
+            str: 'fail'
+        };
+        state.setParam('workedTime', this.worked);
         console.error('Failed to get worked time', res);
     };
 

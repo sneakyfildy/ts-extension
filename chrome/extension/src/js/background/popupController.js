@@ -91,6 +91,13 @@ define([
     };
 
     PopupController.prototype._onFailedGetWorkedTime = function (res) {
+        this.worked = {
+            worked: 0,
+            total: 0,
+            rest: 0,
+            str: 'fail'
+        };
+        state.setParam('workedTime', this.worked);
         console.error('Failed to get worked time', res);
     };
 

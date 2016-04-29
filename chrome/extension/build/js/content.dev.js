@@ -82,7 +82,8 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
           id: this.id('start-btn'),
           title: 'Start ticket',
           cls: this.mainButtonCls,
-          innerHTML: '<span>start</span>'
+          innerHTML: '<span>start</span>',
+          listener: this.onStartButtonClick
         },
         {
           id: this.id('stop-btn'),
@@ -252,31 +253,36 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
     };
     this.collectTicketData = function () {
       var data = {};
-      // id
-      data['id'] = collectParam('id');
-      // queue
-      data['queue'] = collectParam('queue');
-      // subject
-      data['subject'] = collectSubject() || 'not found';
+      data['id'] = collectUrlParam('id');
       return data;
     };
     /**
-     * @private
-     * @param {String} className
-     * @returns {String}
+     * Extract required param from query string
+     * @param {type} paramName
+     * @returns {undefined}
      */
-    function collectParam(className) {
-      var el = d.querySelector('.' + className + ' .value');
-      return !el ? 'not found' : (el.textContent || 'not found').replace(/[\s\t\n]/gim, '');
+    function collectUrlParam(paramName) {
+      var urlSplitByHash, hashString, queryString, urlParams;
+      urlSplitByHash = document.location.href.split('#');
+      queryString = urlSplitByHash[0].split('?')[1];
+      urlParams = makeParamsFromUrlString(queryString) || {};
+      return urlParams[paramName];
     }
-    /**
-     * Find and return ticket subject as string
-     * @returns {String}
-     * @private
-     */
-    function collectSubject() {
-      var header = d.querySelectorAll('#header > h1')[0];
-      return header.textContent.trim().replace(/^#\d+:/gim, '').trim();
+    function makeParamsFromUrlString(str) {
+      if (!str) {
+        return {};
+      }
+      var pairs, keys, params;
+      pairs = str.split('&');
+      params = {};
+      pairs.forEach(function (term) {
+        var pair, key, value;
+        pair = term.split('=');
+        key = pair.shift();
+        value = decodeURIComponent(pair.join('='));
+        params[key] = value;
+      });
+      return params;
     }
     this.id = function (baseId) {
       return 'ts-ext-' + baseId + '-' + Math.floor(Math.random() * 100000000000000);
