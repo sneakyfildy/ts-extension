@@ -61,17 +61,19 @@ define([
             this.workedTimeStr = worked + '/' + total + ' ' + restSuffix;
             rest = parseFloat( rest.toFixed(1) );
 
-            if (rest > 0) {
-                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
-            } else {
-                Badge.setOverWorked('+' + rest, this.workedTimeStr);
-            }
             this.worked = {
                 worked: parseFloat(worked),
                 total: parseFloat(total),
                 rest: rest,
                 str: this.workedTimeStr
             };
+
+            if (rest > 0) {
+                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
+            } else {
+                Badge.setOverWorked('+' + rest, this.workedTimeStr);
+            }
+
         }else{
             console.error('Error in worked time calculation, something has gone wrong');
             this.worked = {

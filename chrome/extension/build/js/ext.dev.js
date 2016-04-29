@@ -831,11 +831,11 @@ define('common/BadgeModule',[
         /**
          * @cfg {String} color for "bad" things
          */
-        this.finalRedColor = '#DF0500';
+        this.finalRedColor = '#D20000'; // hue = 0
         /**
          * @cfg {String} color for "good" things
          */
-        this.finalGreenColor = '#00910D';
+        this.finalGreenColor = '#46D200'; // hue = 100
         /**
          * @cfg {String} Prefix for badge title to display detailed text of worked time
          */
@@ -951,17 +951,19 @@ define('background/popupController',[
             this.workedTimeStr = worked + '/' + total + ' ' + restSuffix;
             rest = parseFloat( rest.toFixed(1) );
 
-            if (rest > 0) {
-                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
-            } else {
-                Badge.setOverWorked('+' + rest, this.workedTimeStr);
-            }
             this.worked = {
                 worked: parseFloat(worked),
                 total: parseFloat(total),
                 rest: rest,
                 str: this.workedTimeStr
             };
+
+            if (rest > 0) {
+                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
+            } else {
+                Badge.setOverWorked('+' + rest, this.workedTimeStr);
+            }
+
         }else{
             console.error('Error in worked time calculation, something has gone wrong');
             this.worked = {
@@ -1027,6 +1029,36 @@ define('background/listenOptions',[
 });
 
 
+/* global chrome, io */
+
+define('background/SocketModule',[
+], function(){
+    function SocketModule(){
+    }
+
+    SocketModule.prototype.init = function (background) {
+        var me = this;
+        this.io = new io('http://127.0.0.1:5555');
+        this.io.on('backend message', function (msg) {
+            console.log('message: ' + msg);
+            if (msg === 'submit'){
+                me.onSubmitTimesheet();
+            }
+        });
+        this.background = background;
+    };
+
+    SocketModule.prototype.onSubmitTimesheet = function(){
+        try{
+            this.background.onSocketMessageSubmit();
+        }catch(err){
+
+        }
+    };
+    return new SocketModule();
+});
+
+
 /**
  * This is the main JS file for background script, it is a subject to grunt's build routine.
  */
@@ -1036,14 +1068,21 @@ require([
     'background/clickHandler',
     'background/listenContent',
     'background/listenPopup',
-    'background/listenOptions'
-], function(User, clickHandler, listenContent, listenPopup, listenOptions){
+    'background/listenOptions',
+    'background/SocketModule'
+], function(User, clickHandler, listenContent, listenPopup, listenOptions, Socket){
+
     var bg = new BackGround();
+    Socket.init(bg);
     User.update(bg.onGotName.bind(bg));
 
     function BackGround(){
         this.onGotName = function(a){
             console.log( 'User name: ', User.getName() || User.getLastNameError());
+            listenPopup.popupController.getWorkedTime();
+        };
+
+        this.onSocketMessageSubmit = function(){
             listenPopup.popupController.getWorkedTime();
         };
     }

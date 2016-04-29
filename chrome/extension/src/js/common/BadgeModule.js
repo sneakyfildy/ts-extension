@@ -25,11 +25,11 @@ define([
         /**
          * @cfg {String} color for "bad" things
          */
-        this.finalRedColor = '#DF0500';
+        this.finalRedColor = '#D20000'; // hue = 0
         /**
          * @cfg {String} color for "good" things
          */
-        this.finalGreenColor = '#00910D';
+        this.finalGreenColor = '#46D200'; // hue = 100
         /**
          * @cfg {String} Prefix for badge title to display detailed text of worked time
          */
