@@ -891,11 +891,12 @@ define('common/BadgeModule',[
 /* global chrome */
 
 define('background/popupController',[
+    'common/dates',
     'background/state',
     'background/user',
     'common/ExtMsgConstructor',
     'common/BadgeModule'
-], function (state, User, ExtMessage, Badge) {
+], function (Dates, state, User, ExtMessage, Badge) {
     function PopupController() {
 
     }
@@ -916,9 +917,12 @@ define('background/popupController',[
     };
 
     PopupController.prototype._sendWorkedTimeRequest = function (userName) {
-        var request = $.ajax({
+        var timesheetUrl = 'https://www.iponweb.net/twiki/bin/view/IPonweb/Timesheet';
+        var today = new Date();
+        timesheetUrl += Dates.getMonthName(today) + today.getFullYear();
+        $.ajax({
             method: 'GET',
-            url: 'https://www.iponweb.net/twiki/bin/view/IPonweb/TimesheetApril2016',
+            url: timesheetUrl,
             timeout: 10000,
             success: this._onGetWorkedTime.bind(this, userName),
             error: this._onFailedGetWorkedTime.bind(this)
