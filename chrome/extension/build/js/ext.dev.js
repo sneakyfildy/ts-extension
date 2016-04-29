@@ -746,7 +746,7 @@ define('background/listenContent',[
 ], function(record, msgRouter, state, RTConstructor, ExtensionMessage, ActionsList){
     msgRouter.addListener(ActionsList.content.clipboardClick, createSomethingByTicketData);
     msgRouter.addListener(ActionsList.content.startTicketClick, createSomethingByTicketData);
-    window.RT = new RTConstructor({
+    var RT = new RTConstructor({
         url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
 
@@ -806,11 +806,96 @@ define('background/listenContent',[
 
 /* global chrome */
 
+define('common/BadgeModule',[
+], function(){
+    /**
+     * @class BadgeModule
+     */
+    function BadgeModule(){
+        /**
+         * @cfg {String}
+         */
+        this.defaultText = '';
+        /**
+         * @cfg {String}
+         */
+        this.defaultTitle = '';
+        /**
+         * @cfg {String}
+         */
+        this.defaultBgColor = '#6D0073'; // dark-violet
+        /**
+         * @cfg {String} While extension is loading or updating something inside badge
+         */
+        this.loadingBgColor = '#666666';
+        /**
+         * @cfg {String} color for "bad" things
+         */
+        this.finalRedColor = '#DF0500';
+        /**
+         * @cfg {String} color for "good" things
+         */
+        this.finalGreenColor = '#00910D';
+        /**
+         * @cfg {String} Prefix for badge title to display detailed text of worked time
+         */
+        this.detailedTemplate = 'Worked/total :: ';
+    }
+
+    BadgeModule.prototype.setLoading = function(){
+        this.setBadge({
+            text: '...',
+            title: 'Updating...',
+            bgColor: this.loadingBgColor
+        });
+    };
+
+    BadgeModule.prototype.setOverWorked = function(amount, detailed){
+        this.setWorked(amount, detailed, this.finalGreenColor);
+    };
+
+    BadgeModule.prototype.setUnderWorked = function(amount, detailed){
+        this.setWorked(amount, detailed, this.finalRedColor);
+    };
+
+    BadgeModule.prototype.setWorked = function(amount, detailed, color){
+        this.setBadge({
+            text: amount + '',
+            title: this.detailedTemplate + detailed,
+            bgColor: color
+        });
+    };
+
+    /**
+     * Shows notif
+     * @param {Object} config
+     * @param {Number} [config.text] text on badge (very limited, around 4 characters)
+     * @param {String} [config.title] title which is displayed on hover
+     * @param {String} [config.bgColor] a background color <b>for the badge text</b>
+     */
+    BadgeModule.prototype.setBadge = function(config){
+        config = config || {};
+        chrome.browserAction.setBadgeText({
+            text: config.text || this.defaultText
+        });
+        chrome.browserAction.setTitle({
+            title: config.title || this.defaultTitle
+        });
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: config.bgColor || this.defaultBgColor
+        });
+    };
+
+    return new BadgeModule();
+});
+/* global chrome */
+
 define('background/popupController',[
     'background/state',
     'background/user',
-    'common/ExtMsgConstructor'
-], function (state, User, ExtMessage) {
+    'common/ExtMsgConstructor',
+    'common/BadgeModule'
+], function (state, User, ExtMessage, Badge) {
     function PopupController() {
 
     }
@@ -824,15 +909,7 @@ define('background/popupController',[
             loading: true
         };
         state.setParam('workedTime', this.worked);
-        chrome.browserAction.setBadgeText({
-            text: '...'
-        });
-        chrome.browserAction.setTitle({
-            title: 'Updating...'
-        });
-        chrome.browserAction.setBadgeBackgroundColor({
-            color: '#666666'
-        });
+        Badge.setLoading();
         User.update(
             this._sendWorkedTimeRequest.bind(this)
         );
@@ -853,7 +930,7 @@ define('background/popupController',[
             console.error('Empty worked time response');
         }
         //April2016 (Working hours - 168)
-        var s, rest, total, worked, color, restString;
+        var s, rest, total, worked, restSuffix;
         s = res;
         total = s.match(/April2016 \(Working hours - (\d+)\)/);
         total = total && total.length > 0 && total[1] || 'unknown';
@@ -866,33 +943,27 @@ define('background/popupController',[
 
         if (total && total !== 'unknown' && !isNaN(worked)) {
             rest = total - worked;
-            if (rest > 0) {
-                color = '#DF0500';
-                restString = '(' + rest.toFixed(1) + 'h left)';
-                rest = '-' + rest.toFixed(1);
-            } else {
-                color = '#00910D';
-                rest = rest.toFixed(1);
-                restString = '(' + rest + 'h overworked)';
-            }
-        }
-        this.workedTimeStr = worked + '/' + total + ' ' + restString;
-        this.worked = {
-            worked: parseFloat(worked),
-            total: parseFloat(total),
-            rest: parseFloat(rest),
-            str: this.workedTimeStr
-        };
+            restSuffix = rest > 0 ? ('(' + rest.toFixed(1) + 'h left)') : ('(' + rest + 'h overworked)');
+            this.workedTimeStr = worked + '/' + total + ' ' + restSuffix;
+            rest = parseFloat( rest.toFixed(1) );
 
-        chrome.browserAction.setBadgeText({
-            text: String(rest)
-        });
-        chrome.browserAction.setTitle({
-            title: 'Worked/total :: ' + this.workedTimeStr
-        });
-        chrome.browserAction.setBadgeBackgroundColor({
-            color: color
-        });
+            if (rest > 0) {
+                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
+            } else {
+                Badge.setOverWorked('+' + rest, this.workedTimeStr);
+            }
+            this.worked = {
+                worked: parseFloat(worked),
+                total: parseFloat(total),
+                rest: rest,
+                str: this.workedTimeStr
+            };
+        }else{
+            console.error('Error in worked time calculation, something has gone wrong');
+            this.worked = {
+                str: 'Error'
+            };
+        }
         state.setParam('workedTime', this.worked);
     };
 

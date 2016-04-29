@@ -3,8 +3,9 @@
 define([
     'background/state',
     'background/user',
-    'common/ExtMsgConstructor'
-], function (state, User, ExtMessage) {
+    'common/ExtMsgConstructor',
+    'common/BadgeModule'
+], function (state, User, ExtMessage, Badge) {
     function PopupController() {
 
     }
@@ -18,15 +19,7 @@ define([
             loading: true
         };
         state.setParam('workedTime', this.worked);
-        chrome.browserAction.setBadgeText({
-            text: '...'
-        });
-        chrome.browserAction.setTitle({
-            title: 'Updating...'
-        });
-        chrome.browserAction.setBadgeBackgroundColor({
-            color: '#666666'
-        });
+        Badge.setLoading();
         User.update(
             this._sendWorkedTimeRequest.bind(this)
         );
@@ -47,7 +40,7 @@ define([
             console.error('Empty worked time response');
         }
         //April2016 (Working hours - 168)
-        var s, rest, total, worked, color, restString;
+        var s, rest, total, worked, restSuffix;
         s = res;
         total = s.match(/April2016 \(Working hours - (\d+)\)/);
         total = total && total.length > 0 && total[1] || 'unknown';
@@ -60,33 +53,27 @@ define([
 
         if (total && total !== 'unknown' && !isNaN(worked)) {
             rest = total - worked;
-            if (rest > 0) {
-                color = '#DF0500';
-                restString = '(' + rest.toFixed(1) + 'h left)';
-                rest = '-' + rest.toFixed(1);
-            } else {
-                color = '#00910D';
-                rest = rest.toFixed(1);
-                restString = '(' + rest + 'h overworked)';
-            }
-        }
-        this.workedTimeStr = worked + '/' + total + ' ' + restString;
-        this.worked = {
-            worked: parseFloat(worked),
-            total: parseFloat(total),
-            rest: parseFloat(rest),
-            str: this.workedTimeStr
-        };
+            restSuffix = rest > 0 ? ('(' + rest.toFixed(1) + 'h left)') : ('(' + rest + 'h overworked)');
+            this.workedTimeStr = worked + '/' + total + ' ' + restSuffix;
+            rest = parseFloat( rest.toFixed(1) );
 
-        chrome.browserAction.setBadgeText({
-            text: String(rest)
-        });
-        chrome.browserAction.setTitle({
-            title: 'Worked/total :: ' + this.workedTimeStr
-        });
-        chrome.browserAction.setBadgeBackgroundColor({
-            color: color
-        });
+            if (rest > 0) {
+                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
+            } else {
+                Badge.setOverWorked('+' + rest, this.workedTimeStr);
+            }
+            this.worked = {
+                worked: parseFloat(worked),
+                total: parseFloat(total),
+                rest: rest,
+                str: this.workedTimeStr
+            };
+        }else{
+            console.error('Error in worked time calculation, something has gone wrong');
+            this.worked = {
+                str: 'Error'
+            };
+        }
         state.setParam('workedTime', this.worked);
     };
 

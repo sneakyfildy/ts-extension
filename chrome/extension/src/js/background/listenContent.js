@@ -10,7 +10,7 @@ define([
 ], function(record, msgRouter, state, RTConstructor, ExtensionMessage, ActionsList){
     msgRouter.addListener(ActionsList.content.clipboardClick, createSomethingByTicketData);
     msgRouter.addListener(ActionsList.content.startTicketClick, createSomethingByTicketData);
-    window.RT = new RTConstructor({
+    var RT = new RTConstructor({
         url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
 
