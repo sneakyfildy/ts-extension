@@ -44,15 +44,18 @@ define([
             console.error('Empty worked time response');
         }
         //April2016 (Working hours - 168)
-        var s, rest, total, worked, restSuffix;
+        var s, rest, total, worked, restSuffix, today, monthYearRegexp;
         s = res;
-        total = s.match(/April2016 \(Working hours - (\d+)\)/);
+        today = new Date();
+        monthYearRegexp = new RegExp('' + Dates.getMonthName(today) + today.getFullYear() + ' \\(Working hours - (\\d+)\\)', 'm');
+        total = s.match(monthYearRegexp);
         total = total && total.length > 0 && total[1] || 'unknown';
         worked = s
             .substring(s.indexOf(userName)) // to reduce length and set starting point for an array
             .split('\n')
             .splice(0, 3)[2];
         worked = worked.replace(/\s\s+|<td\s.+?>|<\/td>/gim, '').replace(/\s/gim, '');
+        worked = worked.replace(/&nbsp;/g, '0');
         worked = parseFloat(worked);
 
         if (total && total !== 'unknown' && !isNaN(worked)) {
