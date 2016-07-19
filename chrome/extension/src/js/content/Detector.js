@@ -1,4 +1,6 @@
-define([], function(){
+define([
+    'common/dates'
+], function(dates){
     function DetectorClass(){
 
         /**
@@ -31,6 +33,25 @@ define([], function(){
         this.canAddMainControls = function(){
             var check = document.querySelectorAll('#page-navigation #page-menu')[0];
             return !!check;
+        };
+
+        this.isConfluenceMonthPage = function(){debugger;
+            var url, timesheetConfluenseUrl, regex;
+            url = document.location.href;
+            timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
+            // https://confluence.iponweb.net/display/TIMESHEETS/2016.07+-+July
+            if (url.indexOf(timesheetConfluenseUrl) === 0){
+                url = url.replace(timesheetConfluenseUrl, '');
+                if (url.length === 0){
+                    return false;
+                }else{
+                    regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
+                    regex = new RegExp(regex, 'gim');
+                    return url.match(regex) !== null;
+                }
+            }else{
+                return false;
+            }
         };
     }
 

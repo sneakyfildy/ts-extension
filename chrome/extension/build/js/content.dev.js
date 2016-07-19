@@ -1,5 +1,5 @@
 ;(function() {
-var common_DebugLoggerConstructor, common_ExtMsgConstructor, common_ActionsList, content_ContentScriptController, content_Detector, content_contentModule, ContentMain;
+var common_DebugLoggerConstructor, common_ExtMsgConstructor, common_ActionsList, content_ContentScriptController, common_dates, content_Detector, content_contentModule, ContentMain;
 common_DebugLoggerConstructor = function () {
   function DebugLoggerConstructor() {
     this.enabled = false;
@@ -299,7 +299,101 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
   }
   return ContentScriptController;
 }(common_ActionsList, common_ExtMsgConstructor);
-content_Detector = function () {
+common_dates = function () {
+  function Dates() {
+  }
+  Dates.prototype.weekdays = {
+    full: [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ],
+    short: [
+      'Sun',
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat'
+    ]
+  };
+  Dates.prototype.months = {
+    full: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'Decemeber'
+    ],
+    short: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+  };
+  Dates.prototype.getFullDate = function (date, needSex) {
+    return this.getHumanDate(date) + ' ' + this.getHumanTime(date, needSex);
+  };
+  Dates.prototype.getHumanDate = function (date) {
+    var month, day, dateFormatted;
+    date = new Date(date.getTime());
+    month = this.xx(date.getMonth() + 1);
+    day = this.xx(date.getDate());
+    dateFormatted = date.getFullYear() + '-' + month + '-' + day;
+    return dateFormatted;
+  };
+  Dates.prototype.getHumanTime = function (date, needSex) {
+    var hours, mins, sex, dateFormatted;
+    hours = this.xx(date.getHours());
+    mins = this.xx(date.getMinutes());
+    sex = this.xx(date.getSeconds());
+    // "secs" =)
+    dateFormatted = hours + ':' + mins + (needSex ? ':' + sex : '');
+    return dateFormatted;
+  };
+  /**
+   * Two digits, '1' -> '01'
+   * @param {Number} value
+   * @returns {String}
+   */
+  Dates.prototype.xx = function (value) {
+    value = parseInt(value, 10);
+    return value < 10 ? '0' + value : value + '';
+  };
+  Dates.prototype.getDayName = function (date, opts) {
+    opts = opts || {};
+    var d = date || new Date();
+    return this.weekdays[opts.short ? 'short' : 'full'][d.getDay()];
+  };
+  Dates.prototype.getMonthName = function (date, opts) {
+    opts = opts || {};
+    var d = date || new Date();
+    return this.months[opts.short ? 'short' : 'full'][d.getMonth()];
+  };
+  return new Dates();
+}();
+content_Detector = function (dates) {
   function DetectorClass() {
     /**
      * Tries to check if this page is a Reuqest Tracker page, which can be
@@ -329,9 +423,28 @@ content_Detector = function () {
       var check = document.querySelectorAll('#page-navigation #page-menu')[0];
       return !!check;
     };
+    this.isConfluenceMonthPage = function () {
+      debugger;
+      var url, timesheetConfluenseUrl, regex;
+      url = document.location.href;
+      timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
+      // https://confluence.iponweb.net/display/TIMESHEETS/2016.07+-+July
+      if (url.indexOf(timesheetConfluenseUrl) === 0) {
+        url = url.replace(timesheetConfluenseUrl, '');
+        if (url.length === 0) {
+          return false;
+        } else {
+          regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
+          regex = new RegExp(regex, 'gim');
+          return url.match(regex) !== null;
+        }
+      } else {
+        return false;
+      }
+    };
   }
   return new DetectorClass();
-}();
+}(common_dates);
 content_contentModule = function (DebugLoggerConstructor, ContentController, Detector) {
   var Debug = new DebugLoggerConstructor();
   Debug.on();
@@ -387,6 +500,8 @@ content_contentModule = function (DebugLoggerConstructor, ContentController, Det
     }
   } catch (err) {
     Debug.log(err);
+  }
+  if (Detector.isConfluenceMonthPage()) {
   }
   function addTicketButtonsContainer() {
     var header, container;

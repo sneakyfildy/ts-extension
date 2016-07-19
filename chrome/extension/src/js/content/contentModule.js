@@ -69,6 +69,9 @@ define([
         Debug.log(err);
     }
 
+    if (Detector.isConfluenceMonthPage()){
+        
+    }
     function addTicketButtonsContainer(){
         var header, container;
         header = d.querySelectorAll('#page-navigation #page-menu')[0];

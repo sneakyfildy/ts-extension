@@ -34,6 +34,7 @@
         "tabs",
         "http://*/*",
         "https://*/*",
-        "https://www.iponweb.net/twiki/*"
+        "https://www.iponweb.net/twiki/*",
+        "https://confluence.iponweb.net/"
     ]
 }
