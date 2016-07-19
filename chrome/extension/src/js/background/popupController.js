@@ -27,9 +27,12 @@ define([
     };
 
     PopupController.prototype._sendWorkedTimeRequest = function (userName) {
-        var timesheetUrl = 'https://www.iponweb.net/twiki/bin/view/IPonweb/Timesheet';
+        //2016.07+-+July
+        var timesheetUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
         var today = new Date();
-        timesheetUrl += Dates.getMonthName(today) + today.getFullYear();
+        var month = (today.getMonth() + 1);
+        month = month < 10 ? '0' + month : month;
+        timesheetUrl += today.getFullYear() + '.' + month + '+-+' + Dates.getMonthName(today);
         $.ajax({
             method: 'GET',
             url: timesheetUrl,
@@ -43,18 +46,18 @@ define([
         if (!res) {
             console.error('Empty worked time response');
         }
-        //April2016 (Working hours - 168)
+        //Working hours: 168
         var s, rest, total, worked, restSuffix, today, monthYearRegexp;
         s = res;
         today = new Date();
-        monthYearRegexp = new RegExp('' + Dates.getMonthName(today) + today.getFullYear() + ' \\(Working hours - (\\d+)\\)', 'm');
+        monthYearRegexp = new RegExp('Working hours:\\s(\\d+)', 'm');
         total = s.match(monthYearRegexp);
         total = total && total.length > 0 && total[1] || 'unknown';
         worked = s
-            .substring(s.indexOf(userName)) // to reduce length and set starting point for an array
+            .substring(s.indexOf('<th class="confluenceTh">' + userName + '</th>')) // to reduce length and set starting point for an array
             .split('\n')
             .splice(0, 3)[2];
-        worked = worked.replace(/\s\s+|<td\s.+?>|<\/td>/gim, '').replace(/\s/gim, '');
+        worked = worked.replace(/\s\s+|<th\s.+?>|<\/th>/gim, '').replace(/\s/gim, '');
         worked = worked.replace(/&nbsp;/g, '0');
         worked = parseFloat(worked);
 

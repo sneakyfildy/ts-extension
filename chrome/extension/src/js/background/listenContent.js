@@ -50,7 +50,7 @@ define([
         }
     }
 
-    function createSomethingByTicketData(request, sender){
+    function createSomethingByTicketData(request, sender){debugger;
         var keyFunction;
         if (!request.data || !request.data.id){
             throw 'Ticket ID is required to get ticket info from RT';
