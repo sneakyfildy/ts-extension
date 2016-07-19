@@ -5,11 +5,15 @@ define([
     'background/msgRouter',
     'background/state',
     'background/rt',
+    'background/user',
     'common/ExtMsgConstructor',
     'common/ActionsList'
-], function(record, msgRouter, state, RTConstructor, ExtensionMessage, ActionsList){
+], function(record, msgRouter, state, RTConstructor, User, ExtensionMessage, ActionsList){
     msgRouter.addListener(ActionsList.content.clipboardClick, createSomethingByTicketData);
     msgRouter.addListener(ActionsList.content.startTicketClick, createSomethingByTicketData);
+
+    msgRouter.addListener(ActionsList.content.confluenceToggleMe, getUserAndReturn);
+
     var RT = new RTConstructor({
         url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
@@ -50,7 +54,7 @@ define([
         }
     }
 
-    function createSomethingByTicketData(request, sender){debugger;
+    function createSomethingByTicketData(request, sender){
         var keyFunction;
         if (!request.data || !request.data.id){
             throw 'Ticket ID is required to get ticket info from RT';
@@ -64,6 +68,27 @@ define([
                 break;
         }
         RT.getTicket(request.data.id, makeAnswer.bind(this, sender.tab.id, keyFunction));
+    }
+
+    function getUserAndReturn(request, sender){
+        var senderId = sender.tab.id;
+        if (!!User.name){
+            giveUsernameForConfluence(senderId, User.name);
+        }else{
+            User.update(
+                giveUsernameForConfluence.bind(senderId)
+            );
+        }
+    }
+
+    function giveUsernameForConfluence(senderId, name){
+        chrome.tabs.sendMessage(
+            senderId,
+            new ExtensionMessage({
+                action: ActionsList.content.gotNameForToggle,
+                data: name
+            })
+        );
     }
 });
 

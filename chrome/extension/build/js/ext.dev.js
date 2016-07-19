@@ -121,11 +121,17 @@ define('common/ActionsList',[
             clipboardClick: transform('getTicketData'),
             contextMenuClick: transform('getTicketDataByContextMenu'),
             startTicketClick: transform('startTicketClick'),
-            gotTicketString: transform('hereIsTheTicketString')
+            gotTicketString: transform('hereIsTheTicketString'),
+            confluenceToggleMe: transform('confluenceToggleMe'),
+            gotNameForToggle: transform('hereIsUserNameForConfluenceToggleMe')
         },
         state: {
             need: transform('generalNeedState'),
             got: transform('generalGotState')
+        },
+        user: {
+            need: transform('generalNeedUser'),
+            got: transform('generalGotUser')
         },
         workedTime: {
             needUpdate: transform('pleaseUpdateWorkedTime')
@@ -741,11 +747,15 @@ define('background/listenContent',[
     'background/msgRouter',
     'background/state',
     'background/rt',
+    'background/user',
     'common/ExtMsgConstructor',
     'common/ActionsList'
-], function(record, msgRouter, state, RTConstructor, ExtensionMessage, ActionsList){
+], function(record, msgRouter, state, RTConstructor, User, ExtensionMessage, ActionsList){
     msgRouter.addListener(ActionsList.content.clipboardClick, createSomethingByTicketData);
     msgRouter.addListener(ActionsList.content.startTicketClick, createSomethingByTicketData);
+
+    msgRouter.addListener(ActionsList.content.confluenceToggleMe, getUserAndReturn);
+
     var RT = new RTConstructor({
         url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
@@ -786,7 +796,7 @@ define('background/listenContent',[
         }
     }
 
-    function createSomethingByTicketData(request, sender){debugger;
+    function createSomethingByTicketData(request, sender){
         var keyFunction;
         if (!request.data || !request.data.id){
             throw 'Ticket ID is required to get ticket info from RT';
@@ -800,6 +810,27 @@ define('background/listenContent',[
                 break;
         }
         RT.getTicket(request.data.id, makeAnswer.bind(this, sender.tab.id, keyFunction));
+    }
+
+    function getUserAndReturn(request, sender){
+        var senderId = sender.tab.id;
+        if (!!User.name){
+            giveUsernameForConfluence(senderId, User.name);
+        }else{
+            User.update(
+                giveUsernameForConfluence.bind(senderId)
+            );
+        }
+    }
+
+    function giveUsernameForConfluence(senderId, name){
+        chrome.tabs.sendMessage(
+            senderId,
+            new ExtensionMessage({
+                action: ActionsList.content.gotNameForToggle,
+                data: name
+            })
+        );
     }
 });
 

@@ -1,8 +1,9 @@
 define([
     'common/DebugLoggerConstructor',
     'content/ContentScriptController',
-    'content/Detector'
-], function(DebugLoggerConstructor, ContentController, Detector){
+    'content/Detector',
+    'content/ConfluencePageController'
+], function(DebugLoggerConstructor, ContentController, Detector, ConfluencePageController){
     var Debug = new DebugLoggerConstructor();
     Debug.on();
 
@@ -70,8 +71,9 @@ define([
     }
 
     if (Detector.isConfluenceMonthPage()){
-        
+        ConfluencePageController.init();
     }
+
     function addTicketButtonsContainer(){
         var header, container;
         header = d.querySelectorAll('#page-navigation #page-menu')[0];

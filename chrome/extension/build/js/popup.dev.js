@@ -140,11 +140,17 @@ define('common/ActionsList',[
             clipboardClick: transform('getTicketData'),
             contextMenuClick: transform('getTicketDataByContextMenu'),
             startTicketClick: transform('startTicketClick'),
-            gotTicketString: transform('hereIsTheTicketString')
+            gotTicketString: transform('hereIsTheTicketString'),
+            confluenceToggleMe: transform('confluenceToggleMe'),
+            gotNameForToggle: transform('hereIsUserNameForConfluenceToggleMe')
         },
         state: {
             need: transform('generalNeedState'),
             got: transform('generalGotState')
+        },
+        user: {
+            need: transform('generalNeedUser'),
+            got: transform('generalGotUser')
         },
         workedTime: {
             needUpdate: transform('pleaseUpdateWorkedTime')

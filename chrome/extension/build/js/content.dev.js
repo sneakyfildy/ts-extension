@@ -1,5 +1,5 @@
 ;(function() {
-var common_DebugLoggerConstructor, common_ExtMsgConstructor, common_ActionsList, content_ContentScriptController, common_dates, content_Detector, content_contentModule, ContentMain;
+var common_DebugLoggerConstructor, common_ExtMsgConstructor, common_ActionsList, content_ContentScriptController, common_dates, content_Detector, common_SelectorsShim, content_ConfluencePageController, content_contentModule, ContentMain;
 common_DebugLoggerConstructor = function () {
   function DebugLoggerConstructor() {
     this.enabled = false;
@@ -47,11 +47,17 @@ common_ActionsList = function (msg) {
       clipboardClick: transform('getTicketData'),
       contextMenuClick: transform('getTicketDataByContextMenu'),
       startTicketClick: transform('startTicketClick'),
-      gotTicketString: transform('hereIsTheTicketString')
+      gotTicketString: transform('hereIsTheTicketString'),
+      confluenceToggleMe: transform('confluenceToggleMe'),
+      gotNameForToggle: transform('hereIsUserNameForConfluenceToggleMe')
     },
     state: {
       need: transform('generalNeedState'),
       got: transform('generalGotState')
+    },
+    user: {
+      need: transform('generalNeedUser'),
+      got: transform('generalGotUser')
     },
     workedTime: { needUpdate: transform('pleaseUpdateWorkedTime') }
   };
@@ -424,7 +430,6 @@ content_Detector = function (dates) {
       return !!check;
     };
     this.isConfluenceMonthPage = function () {
-      debugger;
       var url, timesheetConfluenseUrl, regex;
       url = document.location.href;
       timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
@@ -445,7 +450,133 @@ content_Detector = function (dates) {
   }
   return new DetectorClass();
 }(common_dates);
-content_contentModule = function (DebugLoggerConstructor, ContentController, Detector) {
+common_SelectorsShim = function () {
+  function hasClass(el, className) {
+    if (el.classList)
+      return el.classList.contains(className);
+    else
+      return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+  }
+  function addClass(el, className) {
+    if (el.classList)
+      el.classList.add(className);
+    else if (!hasClass(el, className))
+      el.className += ' ' + className;
+  }
+  function removeClass(el, className) {
+    if (el.classList)
+      el.classList.remove(className);
+    else if (hasClass(el, className)) {
+      var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+      el.className = el.className.replace(reg, ' ');
+    }
+  }
+  return {
+    hasClass: hasClass,
+    addClass: addClass,
+    removeClass: removeClass
+  };
+}();
+content_ConfluencePageController = function (ActionsList, ExtensionMessage, $$) {
+  function ConfluenceController() {
+  }
+  ConfluenceController.prototype.init = function () {
+    this.setExtensionListeners();
+    this.addTableControls();
+    this.setListeners();
+    this.checkInitialState();
+  };
+  ConfluenceController.prototype.checkInitialState = function () {
+    var tableToggledStored = parseInt(localStorage.getItem('tableToggled'), 10);
+    if (!isNaN(tableToggledStored)) {
+      if (!!tableToggledStored && !this.tableToggled || !tableToggledStored && !!this.tableToggled) {
+        this.toggleMe();
+      }
+    }
+  };
+  ConfluenceController.prototype.addTableControls = function () {
+    var tableEl, controlsEl;
+    tableEl = document.querySelectorAll('#main-content .table-wrap')[0];
+    controlsEl = document.createElement('div');
+    controlsEl.className += ' ts-ext-confluence-controls';
+    controlsEl.innerHTML = '<div class="ts-ext-confluence-btn ts-btn-container" data-action="toggleMe" data-type="ts-btn"><span>Toggle Me</span></div>';
+    tableEl.parentNode.insertBefore(controlsEl, tableEl);
+  };
+  ConfluenceController.prototype.setListeners = function () {
+    var controlsEl;
+    controlsEl = document.querySelectorAll('.ts-ext-confluence-controls')[0];
+    controlsEl.addEventListener('click', this.onClick.bind(this));
+  };
+  ConfluenceController.prototype.setExtensionListeners = function () {
+    var me;
+    me = this;
+    chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+      debugger;
+      var data;
+      switch (msg['action']) {
+      case ActionsList.content.gotNameForToggle:
+        if (msg.data) {
+          me.userName = msg.data;
+          me.proceedToggleMe(msg);
+        }
+        break;
+      }
+    });
+  };
+  ConfluenceController.prototype.onClick = function (event) {
+    var neededTarget, action;
+    neededTarget = event.target;
+    while (neededTarget && neededTarget.getAttribute('data-type') !== 'ts-btn') {
+      neededTarget = neededTarget.parentNode;
+    }
+    if (!neededTarget) {
+      return;
+    }
+    action = neededTarget.getAttribute('data-action');
+    if (action && this[action]) {
+      try {
+        this[action]();
+      } catch (err) {
+        throw 'Failed action: ' + action;
+      }
+    } else {
+      throw 'Unknown action: ' + action;
+    }
+  };
+  ConfluenceController.prototype.toggleMe = function () {
+    if (this.userName) {
+      this.proceedToggleMe();
+    } else {
+      chrome.runtime.sendMessage(new ExtensionMessage({
+        action: ActionsList.content.confluenceToggleMe,
+        data: {}
+      }));
+    }
+  };
+  ConfluenceController.prototype.proceedToggleMe = function () {
+    debugger;
+    var name, rows, row, firstCell, table;
+    name = this.userName;
+    rows = document.querySelectorAll('#main-content .confluenceTable tr');
+    for (var i = 0, l = rows.length; i < l; i++) {
+      row = rows[i];
+      firstCell = row.firstElementChild;
+      if (firstCell && firstCell.textContent === name) {
+        $$.addClass(row, 'ts-ext-my-row');
+      } else {
+        $$.removeClass(row, 'ts-ext-my-row');
+      }
+    }
+    table = document.querySelectorAll('#main-content .confluenceTable')[0];
+    if (table) {
+      $$.hasClass(table, 'ts-ext-toggled-me') ? $$.removeClass(table, 'ts-ext-toggled-me') : $$.addClass(table, 'ts-ext-toggled-me');  // todo toggle method in $$
+    }
+    this.tableToggled = !!this.tableToggled ? false : true;
+    localStorage.setItem('tableToggled', this.tableToggled ? 1 : 0);  // todo options
+  };
+  return new ConfluenceController();
+}(common_ActionsList, common_ExtMsgConstructor, common_SelectorsShim);
+content_contentModule = function (DebugLoggerConstructor, ContentController, Detector, ConfluencePageController) {
   var Debug = new DebugLoggerConstructor();
   Debug.on();
   var Content = new ContentController({ Debug: Debug });
@@ -502,6 +633,7 @@ content_contentModule = function (DebugLoggerConstructor, ContentController, Det
     Debug.log(err);
   }
   if (Detector.isConfluenceMonthPage()) {
+    ConfluencePageController.init();
   }
   function addTicketButtonsContainer() {
     var header, container;
@@ -511,6 +643,6 @@ content_contentModule = function (DebugLoggerConstructor, ContentController, Det
     header.insertBefore(container, header.firstChild);
     return container;
   }
-}(common_DebugLoggerConstructor, content_ContentScriptController, content_Detector);
+}(common_DebugLoggerConstructor, content_ContentScriptController, content_Detector, content_ConfluencePageController);
 ContentMain = undefined;
 }());

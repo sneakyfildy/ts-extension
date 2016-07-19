@@ -35,7 +35,7 @@ define([
             return !!check;
         };
 
-        this.isConfluenceMonthPage = function(){debugger;
+        this.isConfluenceMonthPage = function(){
             var url, timesheetConfluenseUrl, regex;
             url = document.location.href;
             timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
