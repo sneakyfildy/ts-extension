@@ -37,7 +37,7 @@ define([
             'September',
             'October',
             'November',
-            'Decemeber'
+            'December'
         ],
         short: [
             'Jan',

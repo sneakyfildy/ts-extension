@@ -37,7 +37,7 @@ define('common/dates',[
             'September',
             'October',
             'November',
-            'Decemeber'
+            'December'
         ],
         short: [
             'Jan',

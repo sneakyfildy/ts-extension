@@ -341,7 +341,7 @@ common_dates = function () {
       'September',
       'October',
       'November',
-      'Decemeber'
+      'December'
     ],
     short: [
       'Jan',
