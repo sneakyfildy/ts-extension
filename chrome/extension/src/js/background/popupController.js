@@ -47,7 +47,7 @@ define([
             console.error('Empty worked time response');
         }
         //Working hours: 168
-        var s, rest, total, worked, restSuffix, today, monthYearRegexp;
+        var s, rest, absRest, total, worked, restSuffix, today, monthYearRegexp;
         s = res;
         today = new Date();
         monthYearRegexp = new RegExp('Working hours:\\s(\\d+)', 'm');
@@ -62,10 +62,11 @@ define([
         worked = parseFloat(worked);
 
         if (total && total !== 'unknown' && !isNaN(worked)) {
-            rest = total - worked;
-            restSuffix = rest > 0 ? ('(' + rest.toFixed(1) + 'h left)') : ('(' + rest + 'h overworked)');
+            rest = (total - worked).toFixed(1);
+            absRest = Math.abs(rest);
+            restSuffix = rest > 0 ? ('(' + absRest + 'h left)') : ('(' + absRest + 'h overworked)');
             this.workedTimeStr = worked + '/' + total + ' ' + restSuffix;
-            rest = parseFloat( rest.toFixed(1) );
+            rest = parseFloat(rest);
 
             this.worked = {
                 worked: parseFloat(worked),
@@ -75,9 +76,9 @@ define([
             };
 
             if (rest > 0) {
-                Badge.setUnderWorked('-' + rest, this.workedTimeStr);
+                Badge.setUnderWorked('-' + absRest, this.workedTimeStr);
             } else {
-                Badge.setOverWorked('+' + rest, this.workedTimeStr);
+                Badge.setOverWorked('+' + absRest, this.workedTimeStr);
             }
 
         }else{
