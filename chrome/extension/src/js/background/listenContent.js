@@ -15,8 +15,7 @@ define([
     msgRouter.addListener(ActionsList.content.confluenceToggleMe, getUserAndReturn);
 
     var RT = new RTConstructor({
-        //url: 'https://www.iponweb.net/rt/REST/1.0/'
-        url: 'https://jira.iponweb.net/rest/api/latest'
+        url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
 
     function makeRecord(ticketData){

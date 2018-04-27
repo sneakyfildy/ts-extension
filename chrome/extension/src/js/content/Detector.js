@@ -11,10 +11,7 @@ define([
         this.detectRequestTracker = function(){
             var url;
             url = document.location.href;
-            return url.match(/rt\/Ticket\/Modify.html/) !== null
-                || url.match(/rt\/Ticket\/Display.html/) !== null
-                || url.match(/jira\.iponweb\.net\/browse/) !== null;
-            ;
+            return url.match(/rt\/Ticket\/Modify.html/) !== null || url.match(/rt\/Ticket\/Display.html/) !== null;
         };
 
         this.getPageType = function(){
@@ -35,26 +32,23 @@ define([
          */
         this.canAddMainControls = function(){
             var check = document.querySelectorAll('#page-navigation #page-menu')[0];
-            var checkJira = document.querySelector('header.issue-header .aui-page-header-main');
-            return !!check || !!checkJira;
+            return !!check;
         };
 
         this.isConfluenceMonthPage = function(){
             var url, timesheetConfluenseUrl, regex;
             url = document.location.href;
-            timesheetConfluenseUrl = 'https://confluence.iponweb.net/pages/viewpage.action?spaceKey=TIMESHEETS';
+            timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
             // https://confluence.iponweb.net/display/TIMESHEETS/2016.07+-+July
-            if (url.indexOf(timesheetConfluenseUrl) === 0 ||
-                (url.match(/TIMESHEETS/) !== null && url.match(/confluence\.iponweb\.net/) !== null)){
-                return true;
-//                url = url.replace(timesheetConfluenseUrl, '');
-//                if (url.length === 0){
-//                    return false;
-//                }else{
-//                    regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
-//                    regex = new RegExp(regex, 'gim');
-//                    return url.match(regex) !== null;
-//                }
+            if (url.indexOf(timesheetConfluenseUrl) === 0){
+                url = url.replace(timesheetConfluenseUrl, '');
+                if (url.length === 0){
+                    return false;
+                }else{
+                    regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
+                    regex = new RegExp(regex, 'gim');
+                    return url.match(regex) !== null;
+                }
             }else{
                 return false;
             }

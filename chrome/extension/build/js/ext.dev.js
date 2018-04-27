@@ -515,9 +515,11 @@ define('background/record',[
 
     RecordMaker.prototype.make = function(details){
         var dateFormatted, date, month, day, endTime, startTime, hours, mins;
-        details.summary = this.sanitizeSubject(details.summary);
-        var textArr = [details.key, '"' + details.summary + '"'];
+        details.subject = this.sanitizeSubject(details.subject);
+        var textArr = [details.queue, details.id, details.subject];
 
+        textArr[1] = 'RT:' + textArr[1];
+        textArr[2] = '"' + textArr[2] + '"';
         date = new Date();
         dateFormatted = dates.getHumanDate(date);
 
@@ -627,7 +629,7 @@ define('background/clickHandler',[
                 var fullUrl;
                 fullUrl = this.url + this.getTicketPattern.replace('%id%', id);
                 this.ajax({
-                    method: 'GET',
+                    method: 'POST',
                     url: fullUrl,
                     success: this.onGetTicket.bind(this, callback),
                     error: this.onGetTicketError.bind(this, callback)
@@ -643,7 +645,7 @@ define('background/clickHandler',[
              * @param {String}
              */
             url: 'http://rt.easter-eggs.org/demos/4.2/',
-            getTicketPattern: '/issue/%id%',
+            getTicketPattern: 'ticket/%id%/show',
             debug: true,
             /**
              * Custom AJAX function, implement it yourself if wanna be jquery-independent
@@ -670,26 +672,44 @@ define('background/clickHandler',[
                     });
                 }
             },
-            parseResponse: function(ticketResponse) {
-                var id, key, summary, errorText;
-                var success = true;
-                try {
-                    id = ticketResponse.id;
-                    key = ticketResponse.key;
-                    summary = ticketResponse.fields.summary;
+            parseResponse: function(ticketResponse){
+                var r, statusLine, emptyLine, possibleErrorLine, data, line, success, errorText;
+                data = {};
+                success = true;
+                errorText ='';
+                r = ticketResponse;
+                r = r.split('\n');
 
-                } catch(err) {
+                statusLine = r.shift();
+                emptyLine = r.shift();
+                possibleErrorLine = r[0];
+
+                if (!statusLine || statusLine.toLowerCase().indexOf('200 ok') < 0 || emptyLine !== ''){
+                    errorText = 'Something went wrong, incorrect server answer structure.';
                     success = false;
-                    errorText = 'Ticket info does not contain vital info, something is wrong';
+                }else if ( possibleErrorLine && possibleErrorLine.indexOf('#') === 0 ){
+                    possibleErrorLine = possibleErrorLine.replace('#', '').replace(/^\s+/gim, '');
+                    errorText = possibleErrorLine;
+                    success = false;
+                }else{
+                    for (var i = 0; i < r.length; i++){
+                        line = r[i];
+                        if (line !== '' && !!line && line.indexOf(': ')){
+                            line = line.split(': ');
+                            if ( line.length >= 2 ){
+                                if (line[0] === 'id'){
+                                    line[1] = line[1].replace('ticket/', '');
+                                }
+                                data[line.shift().toLowerCase()] = line.join(':');
+                            }
+                        }
+                    }
                 }
+
                 return {
                     success: success,
                     errorText: errorText,
-                    ticketData: {
-                        id: id,
-                        key: key,
-                        summary: summary
-                    }
+                    ticketData: data
                 };
             },
             ajax: function(ajaxParams){
@@ -737,8 +757,7 @@ define('background/listenContent',[
     msgRouter.addListener(ActionsList.content.confluenceToggleMe, getUserAndReturn);
 
     var RT = new RTConstructor({
-        //url: 'https://www.iponweb.net/rt/REST/1.0/'
-        url: 'https://jira.iponweb.net/rest/api/latest'
+        url: 'https://www.iponweb.net/rt/REST/1.0/'
     });
 
     function makeRecord(ticketData){
