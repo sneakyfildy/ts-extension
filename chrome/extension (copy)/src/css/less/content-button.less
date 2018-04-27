@@ -1,0 +1,62 @@
+@-webkit-keyframes ts-ext-btn-rotate {
+    100% {
+        .transform(rotate(90deg));
+    }
+}
+@button-color: #444;
+@button-hover: #EF7D00;
+
+.ts-ext-ticket-buttons-container{
+    padding: .6em 1em !important;
+    border: 1px dashed #ccc;
+}
+.ts-btn-container{
+    font: 13px/1.231 arial,helvetica,clean,sans-serif;
+    display: inline-block;
+    margin-left: 10px !important;    
+    color: @button-color;
+    cursor: pointer;
+    
+    
+    .transition-add(color .3s ease-in-out);
+    
+    &:first-child{
+        margin-left: 0px !important;
+    }
+    
+    &:hover{
+        color: @button-hover
+    }
+    
+    span{
+        border-bottom: 1px dashed;
+    }
+}
+
+.ts-add-tag-container{
+    display: inline-block;
+    vertical-align: top;
+    
+    .ts-tag-btn{
+        display: block;
+        
+        span{
+            font-style: italic;
+            color: #666;
+            border-bottom: 1px dashed;
+            cursor: pointer;
+        }
+    }
+    
+    .ts-tag-control-btn{
+        display: block;
+        margin-bottom: 10px;
+        
+        span{
+            color: #444;
+            border-bottom: 1px dashed;
+            cursor: pointer;
+            
+        }
+    }
+}

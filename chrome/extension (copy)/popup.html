@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TS Ext popup</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        <link rel="stylesheet" href="build/css/ext.min.css">
+        <link rel="stylesheet" href="src/css/fonts/font-face.css">
+        <link rel="stylesheet" href="src/css/vendor/bs/bootstrap.min.css">
+        <link rel="stylesheet" href="src/css/vendor/bs/bootstrap-theme.min.css">
+    </head>
+    <body class="ts-ext-popup ts-ext" ng-csp ng-cloak ng-controller="contentController">
+        <div class="header">
+           <div class="status">
+               WD : <span class="started bold" ng-class="started ? 'green' : 'red'">{{started ? '' : 'not'}} started</span>
+            </div>
+            <div class="current-time">
+                {{headerDateString}}&nbsp;
+                {{currentHours}}<span class="flickering">:</span>{{currentMins}}
+                <span class="not-important-forever italic"> (UTC{{timezoneHuman}})</span>
+            </div>            
+        </div>
+        <div class="username">
+            User: <span class="name-text bold" 
+                        ng-class="{error: !!usernameError}">{{username || usernameError}}</span>
+        </div>
+        <div class="ts-popup-content"> 
+            <div class="content-line">
+                <div class="line-right">
+                    <div class="start time" ng-class="started ? 'dblock' : 'dnone'">
+                        Last WD start: <span class="bold">{{wdStartTimeHuman}}</span>                        
+                        <span class="not-important-forever">{{wdStartDateHuman}}</span>
+                    </div>
+                    <div class="end time" ng-class="started ? 'dnone' : 'dblock'">
+                        Last WD end: <span class="bold">{{wdEndTimeHuman}}</span>                        
+                        <span class="not-important-forever">{{wdEndDateHuman}}</span>
+                    </div>
+                </div>
+                
+                <div class="line-left">
+                    <div class="btn btn-default start-day" ng-click="startBtn.onClick()" title="Start/end working day">
+                        {{startBtn.caption}} WD
+                    </div>
+                </div>
+            </div>
+            <div class="content-line" ng-class="{loading: !!workedTime.loading}">                
+                <div class="line-right">
+                    <div class="contents">{{workedTime.str}}</div>
+                    <img class="loading-icon" src="img/bs_loading.gif"/>
+                </div>
+                
+                <div class="line-left">
+                    <div class="btn btn-default update-wt" 
+                         ng-click="updateWorkedBtn.onClick()" 
+                         ng-class="{disabled: !!workedTime.loading}" t
+                         itle="Update worked time">
+                        {{updateWorkedBtn.caption}}
+                    </div>
+                </div>
+            </div>
+            <div class="content-line ticket" ng-repeat="ticket in tickets">
+                <div ng-class="ticket.idLink ? 'dnone' : 'dblock'">#{{ticket.id}}</div>
+                <div ng-class="ticket.idLink ? 'dblock' : 'dnone'">
+                    <a href="#" data-link="{{ticket.idLink}}">#{{ticket.id}}</a>
+                </div>
+                <div>{{ticket.subject}}</div>
+                <div>Started: {{ticket.startTimeHuman}}</div>
+                <div>Duration: {{ticket.durationHuman}}</div>
+            </div>
+        </div>
+        
+        <script src="src/js/vendor/angular.js"></script>
+        <script data-main="build/js/popup.dev" src="src/js/vendor/require.js"></script>        
+        <script type="text/javascript" src="src/js/vendor/jquery-2.1.1.min.js"></script>
+    </body>
+</html>

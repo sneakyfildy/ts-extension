@@ -1,0 +1,112 @@
+/*
+	Any rules can be mixins. These ones are technical and won't go to output
+	Here must be stored "function mixins". Some complicated and connected mixins.
+	- "MERGING!" means that it will be added to existing property of resulting rule, if there' any.
+		Example: merging the rule of 'border-width:1px' will result in 
+		'border-width:1px, 1px' if there was 'border-width:1px' before. LESS do merge with "+:"
+	- use .mixin-name() to prevent outputting such mixins
+*/
+
+.transform(@transformDefinition) {
+	.prefix(transform, @transformDefinition);
+}
+.transition(@transitionDefinition) {
+	.prefix(transition, @transitionDefinition);
+}
+/* 
+	MERGING! .transition Returns prefixed transition rules
+	Allows adding new transition rules on different css properties.
+	Example:
+		.transitionable{
+			.transition-add(opacity .1s ease-in-out);
+			.transition-add(color .3s ease-in-out);
+		}
+*/
+.transition-add(@transitionDefinition){
+	.prefix-add(transition, @transitionDefinition);
+}
+
+/* 
+	Returns prefixed transition rules. Also prefixes value
+	Differs from transtion-add in prefixing transitionable css property
+	Example: ("transform" property requieres prefixing)
+	.foobar{
+		.transition-prefixed-add(transform, .3s ease-in-out);
+	}
+*/
+.transition-prefixed(@transitionProperty, @transitionValue){
+	.prefix-prop-prefixed(transition, @transitionProperty, @transitionValue);
+}
+
+/* 
+	MERGING! .transition-prefixed
+*/
+.transition-prefixed-add(@transitionProperty, @transitionValue){
+	.prefix-prop-prefixed-add(transition, @transitionProperty, @transitionValue);
+}
+
+/* Returns @property prefixed with all prefixes and a @value as value */
+.prefix(@property, @value){
+	-webkit-@{property}: @value;
+	-moz-@{property}: @value;
+	-o-@{property}: @value;
+	-ms-@{property}: @value;
+	@{property}: @value;
+}
+
+/* MERGING! .prefix */
+.prefix-add(@property, @value){
+	-webkit-@{property}+: @value;
+	-moz-@{property}+: @value;
+	-o-@{property}+: @value;
+	-ms-@{property}+: @value;
+	@{property}+: @value;
+}
+
+/* 
+*	Returns @property prefixed with all prefixes and a 
+*	@value with also prefixed another property.
+*	Typical use is willing to get such CSS string:
+*	-webkit-transition: -webkit-transform 0.3s ease-in-out;
+*	Where both property and value should be prefixed
+*/
+.prefix-prop-prefixed(@property, @prefixedProperty, @value){
+	-webkit-@{property}: ~"-webkit-@{prefixedProperty}" @value;
+	-moz-@{property}: ~"-moz-@{prefixedProperty}" @value;
+	-o-@{property}: ~"-o-@{prefixedProperty}" @value;
+	-ms-@{property}: ~"-ms-@{prefixedProperty}" @value;
+	@{property}: @prefixedProperty @value;
+}
+
+/* 
+*	MERGING! .prefix-prop-prefixed
+*/
+.prefix-prop-prefixed-add(@property, @prefixedProperty, @value){
+	-webkit-@{property}+: ~"-webkit-@{prefixedProperty}" @value;
+	-moz-@{property}+: ~"-moz-@{prefixedProperty}" @value;
+	-o-@{property}+: ~"-o-@{prefixedProperty}" @value;
+	-ms-@{property}+: ~"-ms-@{prefixedProperty}" @value;
+	@{property}+: @prefixedProperty @value;
+}
+
+.square(@size){
+	min-width: @size;
+	max-width: @size;
+	min-height: @size;
+	max-height: @size;
+}
+
+.getKeyColumnWidth(@modify){
+	@keyColumnWidth: ( @baseKeyColumnWidth + @modify );
+}
+
+.vertically-middle(@height){
+	position: absolute;
+	top: 50%;
+	height: @height;
+	margin-top: ( -@height / 2 );
+	margin-left: auto;
+	margin-right: auto;
+	left: 0;
+	right: 0;
+}

@@ -1,0 +1,115 @@
+/* hides angular not ready cloaked stuff in CSP mode */
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+@-webkit-keyframes flickering {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0;
+    }
+}
+@header-height: 20px;
+@content-line-height: 40px;
+
+/*-----------------------------*/
+
+body.ts-ext-popup{
+    width: 320px;
+    min-height: 70px;
+    
+    .btn.start-day{        
+    }
+
+    .ts-popup-content{
+        padding: 0 2px;
+
+        .content-line{
+            width: 100%;
+            overflow: hidden;
+            line-height: @content-line-height;
+            border-bottom: 1px solid #ddd;
+            padding: 0 0 2px 0;
+            
+            .line-left{        
+                float: left;
+            }
+            .line-right{
+                float: right;
+            }
+            
+            .loading-icon{
+                display: none;                
+            }
+
+            &.loading{
+                .contents{
+                    display: none;                
+                }
+                .loading-icon{
+                    display: initial;                
+                }
+            }
+            
+            &:last-child{
+                border-bottom: none;
+            }
+            
+        }
+        .ticket{
+            line-height: 1.5em;
+            padding: 2px 5px;
+        }
+        
+        .contents{
+            display: initial;                
+        }        
+    }
+    .header, .username{
+        height: @header-height;
+        line-height: @header-height;
+        font-size: 0.8em;
+        border-bottom: 1px solid #eee;
+        padding: 0 0 0 4px;
+    }
+    .header{
+        
+        .status{
+            float: left;       
+            
+            .started{
+                &.green{
+                    color: @good-color;
+                }
+                &.red{
+                    color: @error-color;
+                }
+            }
+        }
+
+        .current-time{
+            float: right;
+            height: @header-height;            
+            padding: 0 9px;
+            .flickering{
+                /* this is only a cosmetical bullshit */
+                .prefix(animation, flickering 1.3s linear 0s infinite);
+            }
+        }
+
+    }
+    
+    .username{
+        .name-text{
+            color: @good-color;
+            
+            &.error{
+                color: @error-color;
+            }            
+        }
+    }
+        
+}
+
+
