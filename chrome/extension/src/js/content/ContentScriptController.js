@@ -28,19 +28,19 @@ define([
                     cls: this.mainButtonCls,
                     listener: this.onExportButtonClick
                 },
-                {
-                    id: this.id('start-btn'),
-                    title: 'Start ticket',
-                    cls: this.mainButtonCls,
-                    innerHTML: '<span>start</span>',
-                    listener: this.onStartButtonClick
-                },
-                {
-                    id: this.id('stop-btn'),
-                    title: 'Stop ticket',
-                    cls: this.mainButtonCls,
-                    innerHTML: '<span>' + 'stop' + '</span>'
-                }
+//                {
+//                    id: this.id('start-btn'),
+//                    title: 'Start ticket',
+//                    cls: this.mainButtonCls,
+//                    innerHTML: '<span>start</span>',
+//                    listener: this.onStartButtonClick
+//                },
+//                {
+//                    id: this.id('stop-btn'),
+//                    title: 'Stop ticket',
+//                    cls: this.mainButtonCls,
+//                    innerHTML: '<span>' + 'stop' + '</span>'
+//                }
             ];
             return this;
         };
@@ -186,12 +186,17 @@ define([
             addTagControlButtons(buttonArea);
         };
         function addMainButtonsContainer(){
-            var header, container;
+            var header, headerJira, container;
             header = d.querySelectorAll('#page-navigation #page-menu')[0];
+            headerJira = d.querySelector('header.issue-header .aui-page-header-main');
 
             container = d.createElement('li');
             container.setAttribute('class', 'ts-ext-ticket-buttons-container');
-            header.insertBefore(container, header.firstChild);
+            if (header) {
+                header.insertBefore(container, header.firstChild);
+            } else if (headerJira) {
+                headerJira.appendChild(container);
+            }
             return container;
         }
         function addTagControlButtons(buttonArea){
@@ -240,11 +245,9 @@ define([
          * @returns {undefined}
          */
         function collectUrlParam(paramName){
-            var urlSplitByHash, hashString, queryString, urlParams;
-            urlSplitByHash = document.location.href.split('#');
-            queryString = urlSplitByHash[0].split('?')[1];
-            urlParams = makeParamsFromUrlString(queryString) || {};
-            return urlParams[paramName];
+            var urlSplit;
+            urlSplit = document.location.href.split('/');
+            return urlSplit[urlSplit.length - 1];
         }
         function makeParamsFromUrlString(str) {
             if (!str){

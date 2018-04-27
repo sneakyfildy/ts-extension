@@ -32,8 +32,8 @@
         "unlimitedStorage",
         "notifications",
         "tabs",
-        "http://*/*",
-        "https://*/*",
+        "https://www.iponweb.net/*",
+        "https://jira.iponweb.net/*",
         "https://www.iponweb.net/twiki/*",
         "https://confluence.iponweb.net/"
     ]

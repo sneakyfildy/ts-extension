@@ -76,28 +76,13 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
     tagButtonCls = 'ts-tag-btn';
     tagControlButtonCls = 'ts-tag-control-btn';
     this.init = function () {
-      this.mainButtons = [
-        {
+      this.mainButtons = [{
           innerHTML: '<span>clipboard</span>',
           id: this.id('clipboard-btn'),
           title: 'Form TS record and copy to clipboard',
           cls: this.mainButtonCls,
           listener: this.onExportButtonClick
-        },
-        {
-          id: this.id('start-btn'),
-          title: 'Start ticket',
-          cls: this.mainButtonCls,
-          innerHTML: '<span>start</span>',
-          listener: this.onStartButtonClick
-        },
-        {
-          id: this.id('stop-btn'),
-          title: 'Stop ticket',
-          cls: this.mainButtonCls,
-          innerHTML: '<span>' + 'stop' + '</span>'
-        }
-      ];
+        }];
       return this;
     };
     this.setPage = function (pageCfg) {
@@ -221,11 +206,16 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
       addTagControlButtons(buttonArea);
     };
     function addMainButtonsContainer() {
-      var header, container;
+      var header, headerJira, container;
       header = d.querySelectorAll('#page-navigation #page-menu')[0];
+      headerJira = d.querySelector('header.issue-header .aui-page-header-main');
       container = d.createElement('li');
       container.setAttribute('class', 'ts-ext-ticket-buttons-container');
-      header.insertBefore(container, header.firstChild);
+      if (header) {
+        header.insertBefore(container, header.firstChild);
+      } else if (headerJira) {
+        headerJira.appendChild(container);
+      }
       return container;
     }
     function addTagControlButtons(buttonArea) {
@@ -268,11 +258,9 @@ content_ContentScriptController = function (ActionsList, ExtensionMessage) {
      * @returns {undefined}
      */
     function collectUrlParam(paramName) {
-      var urlSplitByHash, hashString, queryString, urlParams;
-      urlSplitByHash = document.location.href.split('#');
-      queryString = urlSplitByHash[0].split('?')[1];
-      urlParams = makeParamsFromUrlString(queryString) || {};
-      return urlParams[paramName];
+      var urlSplit;
+      urlSplit = document.location.href.split('/');
+      return urlSplit[urlSplit.length - 1];
     }
     function makeParamsFromUrlString(str) {
       if (!str) {
@@ -409,7 +397,7 @@ content_Detector = function (dates) {
     this.detectRequestTracker = function () {
       var url;
       url = document.location.href;
-      return url.match(/rt\/Ticket\/Modify.html/) !== null || url.match(/rt\/Ticket\/Display.html/) !== null;
+      return url.match(/rt\/Ticket\/Modify.html/) !== null || url.match(/rt\/Ticket\/Display.html/) !== null || url.match(/jira\.iponweb\.net\/browse/) !== null;
     };
     this.getPageType = function () {
       var url;
@@ -427,22 +415,23 @@ content_Detector = function (dates) {
      */
     this.canAddMainControls = function () {
       var check = document.querySelectorAll('#page-navigation #page-menu')[0];
-      return !!check;
+      var checkJira = document.querySelector('header.issue-header .aui-page-header-main');
+      return !!check || !!checkJira;
     };
     this.isConfluenceMonthPage = function () {
       var url, timesheetConfluenseUrl, regex;
       url = document.location.href;
-      timesheetConfluenseUrl = 'https://confluence.iponweb.net/display/TIMESHEETS/';
+      timesheetConfluenseUrl = 'https://confluence.iponweb.net/pages/viewpage.action?spaceKey=TIMESHEETS';
       // https://confluence.iponweb.net/display/TIMESHEETS/2016.07+-+July
-      if (url.indexOf(timesheetConfluenseUrl) === 0) {
-        url = url.replace(timesheetConfluenseUrl, '');
-        if (url.length === 0) {
-          return false;
-        } else {
-          regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
-          regex = new RegExp(regex, 'gim');
-          return url.match(regex) !== null;
-        }
+      if (url.indexOf(timesheetConfluenseUrl) === 0 || url.match(/TIMESHEETS/) !== null && url.match(/confluence\.iponweb\.net/) !== null) {
+        return true;  //                url = url.replace(timesheetConfluenseUrl, '');
+                      //                if (url.length === 0){
+                      //                    return false;
+                      //                }else{
+                      //                    regex = '\\d\\d\\d\\d\\.\\d\\d.*(' + dates.months.full.join('|') + ')';
+                      //                    regex = new RegExp(regex, 'gim');
+                      //                    return url.match(regex) !== null;
+                      //                }
       } else {
         return false;
       }
@@ -511,7 +500,6 @@ content_ConfluencePageController = function (ActionsList, ExtensionMessage, $$) 
     var me;
     me = this;
     chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-      debugger;
       var data;
       switch (msg['action']) {
       case ActionsList.content.gotNameForToggle:
@@ -554,7 +542,6 @@ content_ConfluencePageController = function (ActionsList, ExtensionMessage, $$) 
     }
   };
   ConfluenceController.prototype.proceedToggleMe = function () {
-    debugger;
     var name, rows, row, firstCell, table;
     name = this.userName;
     rows = document.querySelectorAll('#main-content .confluenceTable tr');

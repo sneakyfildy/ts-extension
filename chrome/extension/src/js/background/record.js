@@ -6,11 +6,9 @@ define([
 
     RecordMaker.prototype.make = function(details){
         var dateFormatted, date, month, day, endTime, startTime, hours, mins;
-        details.subject = this.sanitizeSubject(details.subject);
-        var textArr = [details.queue, details.id, details.subject];
+        details.summary = this.sanitizeSubject(details.summary);
+        var textArr = [details.key, '"' + details.summary + '"'];
 
-        textArr[1] = 'RT:' + textArr[1];
-        textArr[2] = '"' + textArr[2] + '"';
         date = new Date();
         dateFormatted = dates.getHumanDate(date);
 

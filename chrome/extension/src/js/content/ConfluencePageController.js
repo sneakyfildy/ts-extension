@@ -43,7 +43,7 @@ define([
     ConfluenceController.prototype.setExtensionListeners = function(){
         var me;
         me = this;
-        chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {debugger;
+        chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
             var data;
             switch(msg['action']){
                 case ActionsList.content.gotNameForToggle:
@@ -93,7 +93,7 @@ define([
         }
     };
 
-    ConfluenceController.prototype.proceedToggleMe = function(){debugger;
+    ConfluenceController.prototype.proceedToggleMe = function(){
         var name, rows, row, firstCell, table;
         name = this.userName;
 
