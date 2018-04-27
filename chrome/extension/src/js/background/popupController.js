@@ -33,6 +33,7 @@ define([
         var month = (today.getMonth() + 1);
         month = month < 10 ? '0' + month : month;
         timesheetUrl += today.getFullYear() + '.' + month + '+-+' + Dates.getMonthName(today);
+        
         $.ajax({
             method: 'GET',
             url: timesheetUrl,
@@ -46,19 +47,17 @@ define([
         if (!res) {
             console.error('Empty worked time response');
         }
-        //Working hours: 168
         var s, rest, absRest, total, worked, restSuffix, today, monthYearRegexp;
         s = res;
         today = new Date();
         monthYearRegexp = new RegExp('Working hours:\\s(\\d+)', 'm');
         total = s.match(monthYearRegexp);
         total = total && total.length > 0 && total[1] || 'unknown';
-        worked = s
-            .substring(s.indexOf('<th class="confluenceTh">' + userName + '</th>')) // to reduce length and set starting point for an array
-            .split('\n')
-            .splice(0, 3)[2];
-        worked = worked.replace(/\s\s+|<th\s.+?>|<\/th>/gim, '').replace(/\s/gim, '');
-        worked = worked.replace(/&nbsp;/g, '0');
+        worked = s.substring(s.indexOf('<th class="confluenceTh">' + userName + '</th>'))
+            .split('\n').slice(0,1)[0];
+
+        worked = worked.match(/<th class="confluenceTh">(.+?)<\/th>/g)[2];
+        worked = worked.replace(/[^\d\.]/g, '');
         worked = parseFloat(worked);
 
         if (total && total !== 'unknown' && !isNaN(worked)) {
